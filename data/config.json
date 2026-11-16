@@ -1,0 +1,15 @@
+{
+  "provider": "deepseek",
+  "base_url": "",
+  "model": "",
+  "api_key": "",
+  "session_secret": "",
+  "support": "19180862660",
+  "support_hours": "工作日 9:00～19:30",
+  "sharecode": "",
+  "wx_appid": "wxefb9986619ee3a6a",
+  "wx_appsecret": "",
+  "wx_redirect_domain": "",
+  "wx_verify_file": "",
+  "wx_verify_text": ""
+}

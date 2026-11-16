@@ -1,0 +1,5 @@
+{
+  "note": "在此配置可用的 RSS/Atom 源（数组），系统每日 06:00 自动抓取；留空则仅导入 news_inbox.json 中投递的资讯。",
+  "rss": [],
+  "source_name": "行业资讯"
+}

@@ -1,0 +1,2594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>小宠百问 · 管理后台</title>
+<style>
+  /* ============================================================
+     小宠百问 · 后台界面规范 1.0（2026.11）
+     与前台同一套「纸与墨」：纸色底、墨绿主色、陶土只用于警示
+     规则：圆角 2–3px / 不用投影 / 细线分区 / 宋体标题 / 等宽数字
+     ============================================================ */
+  :root {
+    --paper: #F4EFE4;
+    --paper-2: #EFE9DB;
+    --card: #FFFDF7;
+    --ink: #1E2B23;
+    --ink-2: #4A554C;
+    --ink-3: #8A9088;
+    --rule: #DCD5C4;
+    --rule-2: #EAE4D6;
+    --moss: #1E4634;
+    --moss-deep: #16352A;
+    --moss-2: #3F6B52;
+    --moss-soft: #E7EFE6;
+    --clay: #B4572F;
+    --clay-soft: #F3E4DA;
+    --clay-line: #DCC3B4;
+    --indigo: #2B5871;
+    --amber: #9A6B1E;
+
+    /* 兼容层：JS 内联样式仍在用的旧变量名 */
+    --green: #1E4634;
+    --green-dark: #1E4634;
+    --green-soft: #E7EFE6;
+    --blue: #2B5871;
+    --blue-soft: #E3EBF0;
+    --red: #A93E2A;
+    --red-soft: #F6E7E2;
+    --bg: #F4EFE4;
+    --text: #1E2B23;
+    --muted: #4A554C;
+    --faint: #8A9088;
+    --line: #DCD5C4;
+    --shadow: none;
+
+    --serif: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Roboto Mono", monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #D6CEBB; border-radius: 0; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  body {
+    font-family: var(--sans); background: var(--paper); color: var(--ink);
+    min-height: 100vh; font-size: 14px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1120px; margin: 0 auto; padding: 0 22px 64px;
+    border-top: 3px solid var(--moss);
+    border-left: 1px solid var(--rule-2); border-right: 1px solid var(--rule-2);
+    min-height: 100vh;
+  }
+
+  /* ---------- 报头 ---------- */
+  header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 22px 0 18px; border-bottom: 1px solid var(--rule);
+    margin-bottom: 0;
+  }
+  .logo {
+    width: 42px; height: 42px; border: 1px solid var(--moss); border-radius: 2px;
+    display: flex; align-items: center; justify-content: center; flex: none;
+    background: none;
+  }
+  h1 {
+    font-family: var(--serif); font-size: 20px; font-weight: 600;
+    letter-spacing: .06em; line-height: 1.25; color: var(--ink);
+  }
+  .sub {
+    font-family: var(--mono); font-size: 9.5px; color: var(--ink-3);
+    margin-top: 5px; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .hdr-date {
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
+    letter-spacing: .06em; font-variant-numeric: tabular-nums;
+  }
+  .ver-badge {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 500; color: var(--ink-2);
+    white-space: nowrap; background: none; border: 1px solid var(--rule);
+    padding: 3px 8px; border-radius: 2px; letter-spacing: .06em;
+  }
+
+  /* ---------- 按钮 ---------- */
+  .btn {
+    height: 36px; padding: 0 18px; border: 1px solid var(--moss); border-radius: 2px;
+    font-size: 13px; font-weight: 600; letter-spacing: .04em;
+    background: var(--moss); color: var(--card); cursor: pointer; white-space: nowrap;
+    font-family: var(--sans); transition: background .15s;
+  }
+  .btn:hover { background: var(--moss-deep); }
+  .btn:active { opacity: .9; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.ghost { background: none; color: var(--ink-2); border: 1px solid var(--rule); }
+  .btn.ghost:hover { background: var(--card); border-color: var(--ink-3); color: var(--ink); }
+  .btn.danger { background: none; color: var(--red); border: 1px solid var(--clay-line); }
+  .btn.danger:hover { background: var(--red-soft); }
+  .btn.sm { height: 30px; padding: 0 12px; font-size: 12px; }
+
+  /* ---------- Tabs：目录式下划线 ---------- */
+  .tabs {
+    display: flex; gap: 2px; background: none; border: none; border-bottom: 1px solid var(--rule);
+    border-radius: 0; padding: 0; margin-bottom: 24px; overflow-x: auto;
+  }
+  .tab {
+    flex: 1; min-width: 92px; height: 42px; border: none; border-bottom: 2px solid transparent;
+    border-radius: 0; background: none; margin-bottom: -1px;
+    font-size: 13.5px; font-weight: 500; color: var(--ink-3); cursor: pointer; white-space: nowrap;
+    letter-spacing: .03em; transition: color .15s, border-color .15s;
+  }
+  .tab:hover { color: var(--ink-2); }
+  .tab.active { background: none; color: var(--moss); border-bottom-color: var(--moss); font-weight: 700; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 2px;
+    padding: 18px 20px; margin-bottom: 16px; box-shadow: none;
+  }
+  .card-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--rule-2);
+  }
+  .card h2 {
+    font-family: var(--serif); font-size: 15px; font-weight: 600; letter-spacing: .05em; color: var(--ink);
+  }
+  .card h2::before {
+    content: ''; display: inline-block; width: 5px; height: 5px; background: var(--moss);
+    margin-right: 9px; vertical-align: 3px;
+  }
+  .card .tip { font-family: var(--mono); font-size: 10px; color: var(--ink-3); letter-spacing: .05em; }
+
+  /* ---------- 登录 ---------- */
+  .login-card { max-width: 360px; margin: 11vh auto 72px; text-align: center; padding: 30px 26px 26px; }
+  .login-card::before {
+    content: ''; display: block; width: 26px; height: 2px; background: var(--moss);
+    margin: 0 auto 18px;
+  }
+  .login-card h2 { font-size: 17px; margin-bottom: 8px; }
+  .login-card h2::before { display: none; }
+  .login-card p { font-size: 13px; color: var(--ink-3); margin-bottom: 20px; }
+  .login-card input {
+    width: 100%; height: 40px; border: 1px solid var(--rule); border-radius: 2px;
+    padding: 0 12px; font-size: 14px; outline: none; margin-bottom: 10px;
+    background: var(--paper); color: var(--ink); font-family: var(--sans); letter-spacing: .03em;
+  }
+  .login-card input:focus { border-color: var(--moss); background: var(--card); }
+  .login-card .btn { width: 100%; height: 40px; }
+
+  /* ---------- KPI：标尺格 ---------- */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--rule-2); border: 1px solid var(--rule-2);
+    margin-bottom: 16px;
+  }
+  .kpi-grid.mini { grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); }
+  @media (max-width: 760px) {
+    .kpi-grid, .kpi-grid.mini { grid-template-columns: repeat(2, 1fr); }
+  }
+  .kpi {
+    background: var(--card); border: none; border-radius: 0; padding: 16px 15px 14px;
+    box-shadow: none; position: relative; overflow: hidden;
+  }
+  .kpi::after { display: none; }
+  .kpi-label { font-size: 11.5px; color: var(--ink-3); display: flex; align-items: center; gap: 0; letter-spacing: .04em; }
+  .kpi-label::before {
+    content: ''; display: inline-block; width: 5px; height: 5px; background: var(--moss);
+    margin-right: 7px; flex: none;
+  }
+  .kpi.blue .kpi-label::before { background: var(--indigo); }
+  .kpi.amber .kpi-label::before { background: var(--amber); }
+  .kpi.grey .kpi-label::before { background: var(--ink-3); }
+  .kpi-value {
+    font-family: var(--mono); font-size: 30px; font-weight: 500; margin-top: 9px;
+    color: var(--ink); line-height: 1.05; letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-value small { font-family: var(--sans); font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 2px; }
+  .kpi-delta { font-size: 11.5px; margin-top: 8px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .kpi-delta .up { color: var(--moss); font-weight: 600; }
+  .kpi-delta .down { color: var(--clay); font-weight: 600; }
+
+  /* ---------- 图表 ---------- */
+  .chart-wrap { width: 100%; overflow: hidden; }
+  .chart-wrap svg { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 16px; font-family: var(--mono); font-size: 10px; color: var(--ink-3); flex-wrap: wrap; letter-spacing: .04em; }
+  .legend i { display: inline-block; width: 7px; height: 7px; border-radius: 0; margin-right: 6px; vertical-align: 1px; }
+
+  .bars { display: flex; align-items: flex-end; gap: 8px; height: 168px; padding: 10px 2px 0; border-bottom: 1px solid var(--rule); }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .bar-val { font-family: var(--mono); font-size: 10px; color: var(--moss); font-weight: 500; margin-bottom: 5px; font-variant-numeric: tabular-nums; }
+  .bar { width: 100%; max-width: 30px; border-radius: 0; background: var(--moss); min-height: 2px; }
+  .bar-col.dim .bar { background: #E1DACA; }
+  .bar-col.dim .bar-val { color: var(--ink-3); }
+  .bar-lbl { font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); margin-top: 7px; letter-spacing: .02em; }
+
+  /* ---------- 排行 / 列表 ---------- */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .rank-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--rule-2); }
+  .rank-row:last-child { border-bottom: none; }
+  .rank-idx {
+    width: 18px; height: 18px; border-radius: 0; background: none; color: var(--ink-3);
+    font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center; flex: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .rank-row:nth-child(1) .rank-idx,
+  .rank-row:nth-child(2) .rank-idx,
+  .rank-row:nth-child(3) .rank-idx { background: none; color: var(--moss); font-weight: 700; }
+  .rank-q { flex: 1; font-size: 13px; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+  .rank-cnt { font-family: var(--mono); font-size: 11px; color: var(--ink-3); flex: none; font-variant-numeric: tabular-nums; }
+
+  /* ============ 养护数据 ============ */
+  .care-row { padding: 11px 0; border-bottom: 1px solid var(--rule-2); }
+  .care-row:last-child { border-bottom: none; }
+  .care-row-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+  .care-row-top b { font-weight: 600; }
+  .care-row-sub { margin-top: 4px; font-size: 12px; color: var(--ink-3); line-height: 1.7; }
+  .care-dim { color: var(--ink-3); font-size: 12px; font-weight: 400; }
+  .care-flag {
+    font-family: var(--mono); font-size: 9.5px; font-weight: 500; padding: 1px 6px; border-radius: 2px;
+    background: var(--clay-soft); color: var(--clay); white-space: nowrap; border: 1px solid var(--clay-line);
+    letter-spacing: .04em;
+  }
+  .care-flag.ok { background: var(--moss-soft); color: var(--moss); border-color: #CBDCCF; }
+
+  /* 转化漏斗 */
+  .pill {
+    display: inline-block; padding: 1px 6px; border-radius: 2px; font-family: var(--mono);
+    font-size: 9.5px; font-weight: 500; letter-spacing: .04em; border: 1px solid transparent;
+  }
+  .pill.good { background: var(--moss-soft); color: var(--moss); border-color: #CBDCCF; }
+  .pill.mid { background: var(--clay-soft); color: var(--clay); border-color: var(--clay-line); }
+  .pill.low { background: var(--paper-2); color: var(--ink-3); border-color: var(--rule); }
+  .fn-head, .fn-row { display: flex; align-items: center; gap: 10px; }
+  .fn-head { margin-bottom: 10px; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); letter-spacing: .05em; }
+  .fn-row { margin-bottom: 9px; }
+  .fn-label { width: 92px; flex: none; font-size: 12.5px; color: var(--ink); }
+  .fn-row .fn-label { font-weight: 600; }
+  .fn-head .fn-label { font-weight: 400; }
+  .fn-bar-wrap { flex: 1; position: relative; height: 26px; background: var(--paper-2); border-radius: 0; overflow: hidden; padding-right: 62px; box-sizing: border-box; }
+  .fn-head .fn-bar-wrap { background: none; height: auto; padding-right: 6px; text-align: right; }
+  .fn-bar { height: 100%; border-radius: 0; background: var(--moss); }
+  .fn-count {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    width: 58px; text-align: right; font-family: var(--mono); font-size: 11px;
+    font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .fn-rate, .fn-total { width: 62px; flex: none; text-align: right; font-family: var(--mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .fn-rate { color: var(--ink-2); font-weight: 500; }
+  .fn-note {
+    margin-top: 12px; padding: 10px 12px; background: var(--paper); border-left: 2px solid var(--rule);
+    border-radius: 0; font-size: 12px; color: var(--ink-3); line-height: 1.7;
+  }
+  .fn-note b { color: var(--moss); }
+  .fn-total { color: var(--ink-3); }
+  .ch-name { width: 84px; font-size: 12px; flex: none; text-align: right; color: var(--ink-2); }
+  .ch-cnt { width: 86px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); flex: none; font-variant-numeric: tabular-nums; }
+  .dist-row { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+  .dist-name { width: 66px; font-size: 12px; flex: none; text-align: right; color: var(--ink-2); }
+  .dist-track { flex: 1; background: var(--paper-2); border-radius: 0; height: 12px; overflow: hidden; }
+  .dist-fill { height: 100%; border-radius: 0; background: var(--moss); }
+  .dist-cnt { width: 40px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); flex: none; font-variant-numeric: tabular-nums; }
+
+  .rec-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--rule-2); font-size: 13px; }
+  .rec-row:last-child { border-bottom: none; }
+  .rec-time { font-family: var(--mono); color: var(--ink-3); font-size: 10.5px; flex: none; width: 78px; font-variant-numeric: tabular-nums; }
+  .rec-q { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+  .rec-species {
+    flex: none; font-size: 10.5px; color: var(--moss); background: var(--moss-soft);
+    border-radius: 2px; padding: 1px 6px; letter-spacing: .02em;
+  }
+  .rec-ok { flex: none; font-size: 11.5px; font-family: var(--mono); }
+  .rec-ok.ok { color: var(--moss-2); }
+  .rec-ok.fail { color: var(--clay); }
+  .rec-lat { flex: none; font-family: var(--mono); font-size: 10px; color: var(--ink-3); width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3);
+    font-weight: 500; padding: 7px 8px; border-bottom: 1px solid var(--rule);
+    letter-spacing: .06em; white-space: nowrap;
+  }
+  td { padding: 10px 8px; border-bottom: 1px solid var(--rule-2); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(220,213,196,.16); }
+  tfoot td {
+    padding: 9px 8px; border-top: 1px solid var(--rule); border-bottom: none;
+    font-weight: 600; color: var(--ink); background: var(--paper);
+    font-variant-numeric: tabular-nums;
+  }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* 分层 */
+  .tier-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .tier-name { width: 84px; font-size: 13px; flex: none; color: var(--ink-2); }
+  .tier-track { flex: 1; height: 20px; background: var(--paper-2); border-radius: 0; overflow: hidden; }
+  .tier-fill { height: 100%; border-radius: 0; background: var(--moss); }
+  .tier-fill.grey { background: #C9C1AE; }
+  .tier-cnt { width: 62px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); flex: none; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ---------- 表单 ---------- */
+  label { display: block; font-size: 12.5px; color: var(--ink-2); margin: 14px 0 6px; letter-spacing: .02em; }
+  input, select, textarea {
+    width: 100%; height: 38px; border: 1px solid var(--rule); border-radius: 2px;
+    padding: 0 11px; font-size: 14px; outline: none; background: var(--paper); color: var(--ink);
+    font-family: var(--sans); transition: border-color .15s, background .15s;
+  }
+  input:hover, select:hover, textarea:hover { border-color: #CCC3AE; }
+  textarea { height: auto; padding: 9px 11px; font-family: inherit; line-height: 1.7; resize: vertical; }
+  .card input, .card select, .card textarea { max-width: 560px; }
+  input:focus, select:focus, textarea:focus { border-color: var(--moss); background: var(--card); }
+  .hint { font-size: 12px; color: var(--ink-3); margin-top: 8px; line-height: 1.7; }
+  .hint code {
+    background: var(--paper-2); color: var(--moss); border-radius: 2px; padding: 1px 5px;
+    font-family: var(--mono); font-size: 10.5px;
+  }
+  .ok { color: var(--moss); }
+  .warn { color: var(--clay); }
+  .tag {
+    display: inline-block; background: var(--moss-soft); color: var(--moss); border: 1px solid #CBDCCF;
+    border-radius: 2px; padding: 1px 7px; font-size: 11px; margin: 0 6px 6px 0;
+  }
+
+  .empty { color: var(--ink-3); font-size: 12.5px; text-align: center; padding: 26px 0; font-family: var(--mono); letter-spacing: .04em; }
+  .chart-empty {
+    height: 128px; display: flex; align-items: center; justify-content: center;
+    border-bottom: 1px solid var(--rule); font-family: var(--mono); font-size: 11px;
+    color: var(--ink-3); letter-spacing: .06em;
+  }
+
+  #toast {
+    position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%);
+    background: var(--moss); color: var(--card); padding: 10px 20px; border-radius: 2px;
+    font-size: 13px; display: none; z-index: 300; letter-spacing: .03em;
+    border: 1px solid var(--moss-deep);
+  }
+  .back { text-align: center; margin-top: 14px; }
+  .back a { color: var(--ink-3); font-family: var(--mono); font-size: 10.5px; text-decoration: none; letter-spacing: .05em; }
+  .back a:hover { color: var(--moss); }
+
+  /* 小屏适配 */
+  @media (max-width: 560px) {
+    .wrap { padding: 0 12px 44px; }
+    header { gap: 10px; padding: 16px 0 13px; }
+    .logo { width: 34px; height: 34px; }
+    h1 { font-size: 15px; letter-spacing: .04em; }
+    .sub { font-size: 8.5px; letter-spacing: .05em; }
+    .hdr-date { display: none; }
+    .ver-badge { font-size: 8.5px; padding: 2px 6px; }
+    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 0; }
+    .tab { min-width: 0; height: 36px; font-size: 11.5px; padding: 0 1px; letter-spacing: 0; }
+    .kpi { padding: 12px 11px 11px; }
+    .kpi-value { font-size: 22px; }
+    .kpi-label { font-size: 10.5px; }
+    .kpi-delta { font-size: 10.5px; }
+    .card { padding: 14px 12px; }
+    .card h2 { font-size: 14px; }
+    .card-head { flex-wrap: wrap; gap: 4px; }
+    .card .tip { font-size: 9px; }
+    .bars { height: 138px; }
+    #careTrend .bar-val { display: none; }
+    #careTrend .bar-lbl { font-size: 9px; }
+    .rec-lat { display: none; }
+    .rec-time { width: 62px; }
+    th, td { padding: 8px 4px; font-size: 12px; }
+    /* 渠道表 8 列在窄屏放不下，表头文案与列数由 JS 按屏宽裁剪 */
+    #channelTable { overflow-x: auto; }
+    #channelTable th, #channelTable td { padding: 8px 3px; font-size: 11px; }
+  }
+
+  /* ============ 反馈回复 ============ */
+  .fb-mask {
+    position: fixed; inset: 0; z-index: 200; background: rgba(30,43,35,.4);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .fb-mask.show { display: flex; }
+  .fb-modal {
+    width: 100%; max-width: 560px; background: var(--card); border: 1px solid var(--ink-3);
+    border-radius: 2px; padding: 20px 22px 18px; box-shadow: 0 18px 48px rgba(22,53,42,.18);
+  }
+  .fb-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .fb-modal-head h3 { margin: 0; font-family: var(--serif); font-size: 16px; font-weight: 600; letter-spacing: .04em; color: var(--ink); }
+  .fb-x {
+    width: 28px; height: 28px; border: 1px solid var(--rule); background: none; border-radius: 2px;
+    color: var(--ink-3); font-size: 16px; line-height: 1; cursor: pointer;
+  }
+  .fb-x:hover { color: var(--ink); border-color: var(--ink-3); }
+  .fb-quote {
+    background: var(--paper); border-left: 2px solid var(--rule); border-radius: 0;
+    padding: 11px 13px; font-size: 13px; line-height: 1.75; color: var(--ink-2);
+    margin-bottom: 14px; max-height: 150px; overflow-y: auto; white-space: pre-wrap;
+  }
+  .fb-modal textarea {
+    width: 100%; box-sizing: border-box; border: 1px solid var(--rule); border-radius: 2px;
+    padding: 10px 12px; font-size: 14px; line-height: 1.75; font-family: inherit;
+    color: var(--ink); outline: none; resize: vertical; background: var(--paper);
+  }
+  .fb-modal textarea:focus { border-color: var(--moss); background: var(--card); }
+  .fb-tips {
+    display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px;
+    color: var(--ink-3); margin-top: 8px; letter-spacing: .04em;
+  }
+  .fb-modal-acts { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+  /* 反馈工单卡片：响应式，不用表格，避免窄屏把文字挤成竖排 */
+  .fb-list { display: flex; flex-direction: column; gap: 10px; }
+  .fb-item {
+    border: 1px solid var(--rule); border-left: 2px solid var(--rule); border-radius: 2px;
+    background: var(--card); padding: 13px 15px 11px;
+    transition: border-color .15s, background .15s;
+  }
+  .fb-item:hover { border-color: #CCC3AE; }
+  .fb-item.is-pending { background: #FBF7EA; border-color: var(--clay-line); border-left-color: var(--clay); }
+  .fb-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 9px; }
+  .fb-type {
+    display: inline-block; padding: 1px 7px; border-radius: 2px;
+    background: var(--paper-2); color: var(--ink-2); font-size: 10.5px; font-weight: 500;
+    border: 1px solid var(--rule); letter-spacing: .03em;
+  }
+  .fb-type.bug { background: var(--clay-soft); color: var(--clay); border-color: var(--clay-line); }
+  .fb-type.advice { background: #E3EBF0; color: var(--indigo); border-color: #C6D5DF; }
+  .fb-type.content { background: var(--moss-soft); color: var(--moss); border-color: #CBDCCF; }
+  .fb-who {
+    margin-left: auto; display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10px; color: var(--ink-3); letter-spacing: .03em;
+  }
+  .fb-who b { font-weight: 500; color: var(--ink-2); }
+  .fb-body {
+    font-size: 13px; line-height: 1.8; color: var(--ink);
+    white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; max-width: 900px;
+  }
+  .fb-contact { margin-top: 6px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); word-break: break-word; overflow-wrap: anywhere; }
+  .fb-reply {
+    margin-top: 11px; padding: 10px 13px 11px; border-radius: 0;
+    background: var(--moss-soft); border-left: 2px solid var(--moss); max-width: 900px;
+  }
+  .fb-reply-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    font-size: 10.5px; color: var(--moss); font-weight: 600; margin-bottom: 5px; letter-spacing: .04em;
+  }
+  .fb-reply-head em { font-style: normal; font-weight: 400; color: var(--moss-2); font-family: var(--mono); font-size: 10px; }
+  .fb-reply-body {
+    font-size: 12.5px; line-height: 1.8; color: #1B4030;
+    white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;
+  }
+  .fb-acts { display: flex; gap: 8px; justify-content: flex-end; margin-top: 11px; flex-wrap: wrap; }
+  .fb-acts button {
+    height: 27px; padding: 0 12px; border-radius: 2px; border: 1px solid var(--rule);
+    background: var(--card); font-size: 11.5px; color: var(--ink-2); cursor: pointer; white-space: nowrap;
+    letter-spacing: .03em;
+  }
+  .fb-acts button:hover { border-color: var(--moss); color: var(--moss); }
+  .fb-acts button.primary { background: var(--moss); border-color: var(--moss); color: var(--card); }
+  .fb-acts button.primary:hover { background: var(--moss-deep); color: var(--card); }
+  .fb-acts button.danger:hover { border-color: var(--clay); color: var(--clay); }
+  @media (max-width: 560px) {
+    .fb-item { padding: 12px 12px 10px; }
+    .fb-who { width: 100%; margin-left: 0; }
+    .fb-acts button { flex: 1; }
+  }
+
+  /* ============ 用户管理 ============ */
+  .acc-tools { display: flex; gap: 8px; align-items: center; }
+  .acc-tools select {
+    height: 30px; padding: 0 8px; border: 1px solid var(--rule); border-radius: 2px;
+    font-size: 12px; color: var(--ink-2); outline: none; background: var(--card);
+  }
+  .tab-badge {
+    display: inline-block; min-width: 15px; height: 15px; line-height: 15px;
+    padding: 0 4px; margin-left: 5px; border-radius: 2px; background: var(--clay);
+    color: var(--card); font-family: var(--mono); font-size: 9px; font-weight: 500;
+    text-align: center; vertical-align: 1px;
+  }
+  .acc-tools input {
+    height: 30px; padding: 0 10px; border: 1px solid var(--rule); border-radius: 2px;
+    font-size: 12px; color: var(--ink); outline: none; background: var(--paper); width: 180px;
+  }
+  .acc-tools input:focus { border-color: var(--moss); background: var(--card); }
+  .acc-pager { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 16px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+  .acc-pager button {
+    height: 28px; padding: 0 12px; border-radius: 2px; border: 1px solid var(--rule);
+    background: var(--card); color: var(--ink-2); font-size: 11.5px; cursor: pointer;
+  }
+  .acc-pager button:hover:not(:disabled) { border-color: var(--moss); color: var(--moss); }
+  .acc-pager button:disabled { opacity: .35; cursor: default; }
+  .acc-tag {
+    display: inline-block; padding: 1px 6px; border-radius: 2px; font-family: var(--mono);
+    font-size: 9.5px; font-weight: 500; letter-spacing: .04em; border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .acc-tag.on { background: var(--moss-soft); color: var(--moss); border-color: #CBDCCF; }
+  .acc-tag.off { background: var(--red-soft); color: var(--red); border-color: var(--clay-line); }
+  .acc-tag.wx { background: #E3EBF0; color: var(--indigo); border-color: #C6D5DF; }
+  .acc-ip {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+    font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.35;
+  }
+  .acc-ip b { font-weight: 500; color: var(--ink); }
+  .acc-ip span { display: block; font-size: 9.5px; color: var(--ink-3); }
+  .acc-ip.none { color: var(--ink-3); font-size: 11px; }
+  .acc-ip-share {
+    display: inline-block; margin-left: 5px; padding: 0 4px; border-radius: 2px;
+    font-style: normal; font-size: 9px; line-height: 14px; vertical-align: 1px;
+    background: var(--clay-soft, #F3E4DA); color: var(--clay, #B4572F); border: 1px solid var(--clay-line, #E3CDBE);
+  }
+  .acc-split { margin-bottom: 14px; }
+  .acc-split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .acc-split-item {
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px;
+    padding: 12px 14px; background: var(--card); border: 1px solid var(--rule);
+    border-radius: 2px;
+  }
+  .acc-split-item.new { border-left: 2px solid var(--moss); }
+  .acc-split-item.old { border-left: 2px solid var(--ink-3); }
+  .acc-split-item .as-label { font-size: 12px; color: var(--ink-2); }
+  .acc-split-item .as-label i {
+    font-style: normal; font-size: 10px; color: var(--ink-3); margin-left: 6px;
+  }
+  .acc-split-item .as-num {
+    font-family: var(--mono); font-size: 17px; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .acc-split-item .as-sub {
+    margin-left: auto; font-size: 11px; color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .acc-split-note {
+    margin-top: 8px; font-size: 10.5px; color: var(--ink-3); line-height: 1.7;
+  }
+  .acc-use {
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.4;
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .acc-use b { font-weight: 500; color: var(--ink); }
+  .acc-use span { display: block; font-size: 9.5px; color: var(--ink-3); }
+  .acc-tag.new { background: #EFEFE9; color: var(--ink-2); border-color: var(--rule); margin-left: 5px; }
+  .acc-ip-th, .acc-ip-td { white-space: nowrap; }
+  .acc-act { display: flex; gap: 6px; flex-wrap: wrap; }
+  .acc-act button {
+    height: 25px; padding: 0 8px; border-radius: 2px; border: 1px solid var(--rule);
+    background: var(--card); font-size: 11px; color: var(--ink-2); cursor: pointer;
+    white-space: nowrap; letter-spacing: .02em;
+  }
+  .acc-act button:hover { border-color: var(--moss); color: var(--moss); }
+  .acc-act button.danger:hover { border-color: var(--clay); color: var(--clay); }
+  @media (max-width: 760px) {
+    .acc-tools input { width: 120px; }
+    .acc-hide-sm { display: none; }
+    .acc-split-row { grid-template-columns: 1fr; }
+    .acc-split-item .as-sub { margin-left: 0; }
+    /* 手机上隐藏两列时间，IP 保留；表格过宽时整体横向滚动，不再把列裁掉 */
+    #accTable { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    #accTable table { min-width: 640px; }
+    #accTable td, #accTable th { padding-left: 6px; padding-right: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="小宠百问">
+        <path d="M32 12c-8.8 0-16 6.2-16 13.9 0 5.6 3.7 10.6 9.3 12.9-.5 2.9-1.8 5.5-3.6 7.4.3 0 4.2-1.4 7.2-3.9.9.1 1.9.2 3.1.2 8.8 0 16-6.2 16-13.9S40.8 12 32 12z" fill="#1E4634"/>
+        <path d="M26 25.4c.7 2.4 1.8 4.7 3.4 6.5" stroke="#FFFDF7" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <circle cx="23" cy="30.4" r="2.2" fill="#FFFDF7"/>
+      </svg>
+    </div>
+    <div>
+      <h1>小宠百问 · 管理后台</h1>
+      <div class="sub" id="hdrSub">用户活跃 · 内容质量 · 系统配置</div>
+    </div>
+    <div class="hdr-right">
+      <span class="ver-badge" id="adminVer">后台 v1.13.0</span>
+      <span class="hdr-date" id="hdrDate"></span>
+      <button class="btn ghost sm" id="logoutBtn" style="display:none">退出</button>
+    </div>
+  </header>
+
+  <!-- ============ 登录 ============ -->
+  <section id="loginPanel">
+    <div class="card login-card">
+      <h2>管理员登录</h2>
+      <p>请输入管理员密码查看运营数据</p>
+      <input id="loginPwd" type="password" placeholder="管理员密码">
+      <button class="btn" id="loginBtn">进入后台</button>
+      <div class="hint" id="loginErr" style="color:var(--red)"></div>
+    </div>
+  </section>
+
+  <!-- ============ 主界面 ============ -->
+  <section id="appPanel" style="display:none">
+    <nav class="tabs">
+      <button class="tab active" data-tab="overview">数据概览</button>
+      <button class="tab" data-tab="accounts">用户管理</button>
+      <button class="tab" data-tab="feedback">用户反馈<span class="tab-badge" id="fbBadge" style="display:none"></span></button>
+      <button class="tab" data-tab="users">用户分析</button>
+      <button class="tab" data-tab="care">养护数据</button>
+      <button class="tab" data-tab="content">内容分析</button>
+      <button class="tab" data-tab="news">资讯更新</button>
+      <button class="tab" data-tab="config">系统配置</button>
+    </nav>
+
+    <!-- 数据概览 -->
+    <div id="panel-overview">
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">今日活跃 DAU</div>
+          <div class="kpi-value" id="kpiDau">—</div>
+          <div class="kpi-delta" id="kpiDauDelta">—</div>
+        </div>
+        <div class="kpi blue">
+          <div class="kpi-label">月活跃 MAU（近30天）</div>
+          <div class="kpi-value" id="kpiMau">—</div>
+          <div class="kpi-delta" id="kpiMauDelta">—</div>
+        </div>
+        <div class="kpi amber">
+          <div class="kpi-label">活跃粘性 DAU/MAU</div>
+          <div class="kpi-value" id="kpiSticky">—</div>
+          <div class="kpi-delta" id="kpiStickyTip">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">累计用户（设备）</div>
+          <div class="kpi-value" id="kpiUsers">—</div>
+          <div class="kpi-delta" id="kpiUsersTip">—</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid mini">
+        <div class="kpi grey">
+          <div class="kpi-label">今日新增</div>
+          <div class="kpi-value" id="kpiNew">—</div>
+          <div class="kpi-delta" id="kpiNewTip">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">今日提问</div>
+          <div class="kpi-value" id="kpiQ">—</div>
+          <div class="kpi-delta" id="kpiQTip">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">次日留存</div>
+          <div class="kpi-value" id="kpiR1">—</div>
+          <div class="kpi-delta" id="kpiR1Tip">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">回答成功率</div>
+          <div class="kpi-value" id="kpiOk">—</div>
+          <div class="kpi-delta" id="kpiOkTip">—</div>
+        </div>
+      </div>
+
+      <div class="hint" style="margin:-4px 0 8px">养护实时数据，明细见「养护数据」页</div>
+      <div class="kpi-grid mini" style="margin-bottom:14px">
+        <div class="kpi grey">
+          <div class="kpi-label">异宠档案</div>
+          <div class="kpi-value" id="ovPets">—</div>
+          <div class="kpi-delta" id="ovPetsTip">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">今日温湿度记录</div>
+          <div class="kpi-value" id="ovLogs">—</div>
+          <div class="kpi-delta" id="ovLogsTip">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">今日分诊</div>
+          <div class="kpi-value" id="ovTri">—</div>
+          <div class="kpi-delta" id="ovTriTip">—</div>
+        </div>
+        <div class="kpi amber">
+          <div class="kpi-label">近 24h 温湿度异常</div>
+          <div class="kpi-value" id="ovAbn">—</div>
+          <div class="kpi-delta" id="ovAbnTip">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>近 30 天日活趋势（DAU）</h2>
+          <div class="legend"><span><i style="background:#1E4634"></i>日活设备</span><span><i style="background:#B4572F"></i>新增设备</span></div>
+        </div>
+        <div class="chart-wrap" id="dauChart"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-head"><h2>近 6 个月月活（MAU）</h2><span class="tip">按自然月去重</span></div>
+          <div id="mauChart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>活跃分层</h2><span class="tip">按最近访问时间</span></div>
+          <div id="tierBox"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>用户转化漏斗</h2><span class="tip">从进入到反复使用</span></div>
+        <div id="funnelBox"></div>
+        <div class="hint">「环节转化」是相对上一层的人数比例，「总体转化」是相对全部访客。重点看哪一层掉得最多。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>用户来源渠道</h2><span class="tip">按用户首次访问归因</span></div>
+        <div id="channelBox"></div>
+        <div class="hint">
+          <div style="margin-bottom:6px">发出去的链接带上 <code>from</code> 参数，后台才能准确区分渠道。可直接用下面的链接：</div>
+          <div style="margin-bottom:4px">公众号文章 <code>?from=mp_article</code>　二维码 <code>?from=qrcode</code>　微信群 <code>?from=group</code>　朋友圈 <code>?from=moments</code></div>
+          <div style="margin-bottom:6px">自定义渠道用任意标识，例如 <code>?from=kol_zhang</code>，后台会按原样显示。</div>
+          <div>用户从「我的 → 分享给朋友」发出的链接自带 <code>from=share</code>，记为「好友分享」；不带任何参数时，按微信环境与来源域名自动判断。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户分析 -->
+    <!-- 用户管理 -->
+    <div id="panel-accounts" style="display:none">
+      <div class="kpi-grid mini" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi">
+          <div class="kpi-label">注册用户数</div>
+          <div class="kpi-value" id="accTotal">—</div>
+          <div class="kpi-delta" id="accTotalTip">登录账号总数</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">今日新增注册</div>
+          <div class="kpi-value" id="accNew">—</div>
+          <div class="kpi-delta">按 UTC+8 自然日</div>
+        </div>
+        <div class="kpi blue">
+          <div class="kpi-label">今日登录</div>
+          <div class="kpi-value" id="accActive">—</div>
+          <div class="kpi-delta" id="accActiveTip">近 30 天活跃 —</div>
+        </div>
+        <div class="kpi amber">
+          <div class="kpi-label">微信授权用户</div>
+          <div class="kpi-value" id="accWx">—</div>
+          <div class="kpi-delta" id="accWxTip">手机号注册 —</div>
+        </div>
+      </div>
+
+      <div class="acc-split" id="accSplit"></div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>用户列表</h2>
+          <div class="acc-tools">
+            <input id="accSearch" type="text" placeholder="搜索手机号 / 昵称 / IP">
+            <button class="btn sm" id="accSearchBtn">搜索</button>
+          </div>
+        </div>
+        <div id="accTable"><div class="empty">加载中…</div></div>
+        <div class="acc-pager" id="accPager"></div>
+        <div class="hint" style="margin-top:14px">
+          「归属地」由最近一次访问的 IP 离线解析得出（省·市），第二行小字是原始 IP 与记录时间，
+          悬停可看运营商和注册地。老账号在升级前没有留痕，显示「未记录」，等用户下次打开页面即自动补上；
+          同一 IP 挂了多个号会标「同IP N」。<br>
+          「登录 / 使用」：上面是登录次数，下面是累计与今日使用时长，鼠标停住可看最近在线时间；
+          没有上报过时长的老账号显示「时长未记录」。
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户反馈 -->
+    <div id="panel-feedback" style="display:none">
+      <div class="kpi-grid mini" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi amber">
+          <div class="kpi-label">待处理反馈</div>
+          <div class="kpi-value" id="fbPending">—</div>
+          <div class="kpi-delta">需要跟进的工单</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">今日新增</div>
+          <div class="kpi-value" id="fbToday">—</div>
+          <div class="kpi-delta">按 UTC+8 自然日</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">累计反馈</div>
+          <div class="kpi-value" id="fbTotal">—</div>
+          <div class="kpi-delta">来自前台「联系客服」</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>反馈列表</h2>
+          <div class="acc-tools">
+            <select id="fbFilter">
+              <option value="">全部</option>
+              <option value="pending">待处理</option>
+              <option value="replied">已回复</option>
+              <option value="done">已处理</option>
+            </select>
+            <button class="btn sm" id="fbRefresh">刷新</button>
+          </div>
+        </div>
+        <div id="fbTable"><div class="empty">加载中…</div></div>
+        <div class="acc-pager" id="fbPager"></div>
+      </div>
+
+      <!-- 回复弹窗 -->
+      <div class="fb-mask" id="fbMask">
+        <div class="fb-modal">
+          <div class="fb-modal-head">
+            <h3>回复用户反馈</h3>
+            <button class="fb-x" id="fbClose" aria-label="关闭">×</button>
+          </div>
+          <div class="fb-quote" id="fbQuote"></div>
+          <textarea id="fbReplyText" rows="5" maxlength="1000" placeholder="回复会显示在用户「我的 → 联系客服 → 我的反馈」里，请写得具体些"></textarea>
+          <div class="fb-tips">
+            <span id="fbReplyCount">0 / 1000</span>
+            <span>用户下次打开客服面板即可看到</span>
+          </div>
+          <div class="fb-modal-acts">
+            <button class="btn ghost" id="fbCancel">取消</button>
+            <button class="btn" id="fbSend">发送回复</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 用户分析 -->
+    <div id="panel-users" style="display:none">
+      <div class="card">
+        <div class="card-head">
+          <h2>日活与新增趋势（近 30 天）</h2>
+          <span class="tip">同一天多次打开只计 1 个活跃</span>
+        </div>
+        <div class="chart-wrap" id="dauChart2"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>月活趋势（近 6 个月）</h2></div>
+        <div id="mauChart2"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>渠道明细</h2><span class="tip">用户 = 有过访问记录的账号 · 提问率 = 提过问题的人占比</span></div>
+        <div id="channelTable"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-head"><h2>留存表现</h2></div>
+          <div id="retentionBox"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>提问时段分布</h2><span class="tip">近全部记录</span></div>
+          <div class="chart-wrap" id="hourChart"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>活跃用户 TOP 10</h2><span class="tip">设备号已脱敏</span></div>
+        <div id="topDevices"></div>
+      </div>
+    </div>
+
+    <!-- 养护数据 -->
+    <div id="panel-care" style="display:none">
+      <div class="card">
+        <div class="card-head">
+          <h2>养护使用实时概览</h2>
+          <span class="tip">每 15 秒自动刷新 · <span id="careLive">—</span></span>
+        </div>
+        <div class="kpi-grid mini">
+          <div class="kpi grey">
+            <div class="kpi-label">建档用户</div>
+            <div class="kpi-value" id="careUserCnt">—</div>
+            <div class="kpi-delta" id="careUserTip">—</div>
+          </div>
+          <div class="kpi grey">
+            <div class="kpi-label">异宠档案</div>
+            <div class="kpi-value" id="carePetCnt">—</div>
+            <div class="kpi-delta" id="carePetTip">—</div>
+          </div>
+          <div class="kpi grey">
+            <div class="kpi-label">温湿度记录</div>
+            <div class="kpi-value" id="careLogCnt">—</div>
+            <div class="kpi-delta" id="careLogTip">—</div>
+          </div>
+          <div class="kpi amber">
+            <div class="kpi-label">近 24h 异常</div>
+            <div class="kpi-value" id="careAbnCnt">—</div>
+            <div class="kpi-delta">超出适宜区间</div>
+          </div>
+        </div>
+        <div class="kpi-grid mini" style="margin-top:12px">
+          <div class="kpi grey">
+            <div class="kpi-label">今日温湿度</div>
+            <div class="kpi-value" id="careLogToday">—</div>
+          </div>
+          <div class="kpi grey">
+            <div class="kpi-label">今日打卡</div>
+            <div class="kpi-value" id="carePlToday">—</div>
+          </div>
+          <div class="kpi grey">
+            <div class="kpi-label">今日分诊</div>
+            <div class="kpi-value" id="careTriToday">—</div>
+          </div>
+          <div class="kpi grey">
+            <div class="kpi-label">今日急救查看</div>
+            <div class="kpi-value" id="careAidToday">—</div>
+          </div>
+          <div class="kpi grey">
+            <div class="kpi-label">今日就医查看</div>
+            <div class="kpi-value" id="careVetToday">—</div>
+          </div>
+          <div class="kpi grey">
+            <div class="kpi-label">今日拍照诊断</div>
+            <div class="kpi-value" id="careDiagToday">—</div>
+          </div>
+        </div>
+        <div class="hint">「异常」指温度或湿度超出该物种参考区间，按最近 24 小时记录实时统计，可据此主动联系用户。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>近 14 天记录与分诊</h2>
+          <div class="legend"><span><i style="background:#1E4634"></i>温湿度记录</span><span><i style="background:#B4572F"></i>分诊次数</span></div>
+        </div>
+        <div class="bars" id="careTrend"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-head"><h2>物种分布 TOP 10</h2><span class="tip">按档案数，括号内为记录数</span></div>
+          <div id="careSpecies"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>分诊结果分布</h2><span class="tip">累计 <b id="careTriTotal">0</b> 次评估</span></div>
+          <div id="careLevels"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>打卡类型分布</h2><span class="tip">累计 <b id="carePlTotal">0</b> 条，喂食/蜕皮/排便/用药/体重</span></div>
+        <div id="carePlTypes"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>拍照诊断</h2><span class="tip">累计 <b id="careDiagTotal">0</b> 次，<b id="careDiagUsers">0</b> 人用过</span></div>
+        <div class="grid2" style="gap:24px">
+          <div>
+            <div class="hint" style="margin:0 0 8px">AI 判断分级</div>
+            <div id="careDiagLevels"></div>
+          </div>
+          <div>
+            <div class="hint" style="margin:0 0 8px">诊断涉及的物种</div>
+            <div id="careDiagSpecies"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>温湿度异常明细</h2><span class="tip">近 24 小时，最多 20 条</span></div>
+        <div id="careAbnormal"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-head"><h2>高频症状 TOP 10</h2><span class="tip">用户勾选最多的表现</span></div>
+          <div id="careSymptoms"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>急救条目查看</h2><span class="tip">按展开次数</span></div>
+          <div id="careAidTop"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>养护用户明细</h2><span class="tip">按最近操作排序，最多 50 人</span></div>
+        <div id="careUserTable"></div>
+      </div>
+    </div>
+
+    <!-- 内容分析 -->
+    <div id="panel-content" style="display:none">
+      <div class="kpi-grid mini" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi grey">
+          <div class="kpi-label">累计提问</div>
+          <div class="kpi-value" id="cTotal">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">知识命中率</div>
+          <div class="kpi-value" id="cHit">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">平均响应</div>
+          <div class="kpi-value" id="cLat">—</div>
+        </div>
+        <div class="kpi grey">
+          <div class="kpi-label">人均提问</div>
+          <div class="kpi-value" id="cPer">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>近 7 天提问量</h2></div>
+        <div id="qChart7"></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-head"><h2>热门问题 TOP 10</h2></div>
+          <div id="topQuestions"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>物种提问分布 TOP 15</h2></div>
+          <div id="speciesDist"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>知识盲区 TOP 10</h2>
+          <span class="tip" id="gapTip">未命中知识库的问题，按出现次数排序</span>
+        </div>
+        <div id="knowledgeGaps"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>最近提问记录</h2><span class="tip">最新 20 条</span></div>
+        <div id="recentList"></div>
+      </div>
+
+      <div class="card" style="border-color:#DCC3B4">
+        <div class="card-head"><h2 style="color:var(--red)">数据管理</h2></div>
+        <button class="btn danger" id="clearStats">清空全部统计数据</button>
+        <div class="hint">清空后不可恢复，会同时清除用户活跃记录，仅影响统计，不影响访客对话与知识库。</div>
+      </div>
+    </div>
+
+    <!-- 资讯更新 -->
+    <div id="panel-news" style="display:none">
+      <div class="card">
+        <div class="card-head"><h2>行业动态状态</h2><button class="btn sm" id="newsRun">立即更新</button></div>
+        <div id="news-status-box">加载中…</div>
+        <div class="hint">
+          系统每天 06:00 自动抓取并合并资讯。可在服务器 data/news_sources.json 中配置 RSS 源；
+          投递到 data/news_inbox.json 的条目也会在更新时自动导入。
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom:4px">新增一条资讯</h2>
+        <label>标题</label>
+        <input id="newsTitle" type="text" placeholder="资讯标题">
+        <label>摘要</label>
+        <textarea id="newsSummary" rows="3" placeholder="简要内容"></textarea>
+        <label>来源</label>
+        <input id="newsSource" type="text" placeholder="如：行业媒体 / 官方发布">
+        <label>原文链接（选填，填写后前台显示「原文」入口）</label>
+        <input id="newsUrl" type="text" placeholder="https://…">
+        <label>日期</label>
+        <input id="newsDate" type="date">
+        <label>板块（留空自动归类）</label>
+        <select id="newsSection">
+          <option value="">自动归类</option>
+          <option value="policy">政策法规</option>
+          <option value="market">市场大盘</option>
+          <option value="reptile">爬宠</option>
+          <option value="bird">鸟类</option>
+          <option value="mammal">小型哺乳</option>
+          <option value="arthropod">节肢·两栖</option>
+          <option value="aquatic">水生·水族</option>
+        </select>
+        <div style="margin-top:16px"><button class="btn" id="newsAdd">发布资讯</button></div>
+      </div>
+    </div>
+
+    <!-- 系统配置 -->
+    <div id="panel-config" style="display:none">
+      <div class="card">
+        <div class="card-head"><h2>当前状态</h2></div>
+        <div id="status-box">加载中…</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>大模型配置</h2></div>
+        <label>服务商</label>
+        <select id="provider">
+          <option value="deepseek">DeepSeek（推荐，性价比高）</option>
+          <option value="qwen">通义千问</option>
+          <option value="moonshot">Moonshot Kimi</option>
+          <option value="zhipu">智谱GLM</option>
+          <option value="openai">OpenAI</option>
+          <option value="custom">自定义（OpenAI 兼容）</option>
+        </select>
+        <label>API 地址（Base URL）</label>
+        <input id="base_url" type="text" placeholder="https://api.deepseek.com/v1">
+        <label>模型名称</label>
+        <input id="model" type="text" placeholder="deepseek-chat">
+        <label>API Key</label>
+        <input id="api_key" type="password" placeholder="留空表示不修改已有 Key">
+
+        <h2 style="margin:22px 0 6px">识图模型（拍照诊断）</h2>
+        <label>识图模型名称（留空则按服务商自动选择）</label>
+        <input id="vision_model" type="text" placeholder="如 deepseek-flash / qwen-vl-plus / glm-4v-flash">
+        <label>识图 API 地址（可选，留空沿用上面的地址）</label>
+        <input id="vision_base_url" type="text" placeholder="留空沿用上面的 Base URL">
+        <label>识图 API Key（可选，留空沿用上面的 Key）</label>
+        <input id="vision_api_key" type="password" placeholder="留空沿用上面的 Key">
+        <div class="hint" id="visionHint">当前生效：—</div>
+
+        <label style="margin-top:18px">管理员密码</label>
+        <input id="password" type="password" placeholder="输入当前管理员密码">
+        <label>新管理员密码（可选）</label>
+        <input id="new_password" type="password" placeholder="留空则不修改，至少 6 位">
+
+        <h2 style="margin:22px 0 6px">客服设置</h2>
+        <label>客服联系方式（显示在前台「联系客服」面板，留空则不显示）</label>
+        <input id="support" type="text" placeholder="如：微信 xiaochong_kf / 邮箱 kefu@example.com">
+        <label>响应时间说明（可选）</label>
+        <input id="support_hours" type="text" placeholder="如：工作日 09:00-21:00，1 个工作日内回复">
+        <div style="margin-top:16px"><button class="btn" id="save">保存配置</button></div>
+        <div class="hint">Key 仅保存在服务器端，不会暴露给访客。默认密码为 xiaochong2026，建议登录后修改。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>附近医院</h2>
+          <span class="tip">高德地图</span>
+        </div>
+        <div class="hint" style="line-height:1.9">
+          前台「养护 → 附近医院」按用户定位找动物医院，点「导航过去」直接调起高德。
+          到 <a href="https://console.amap.com/dev/key/app" target="_blank" rel="noopener">高德开放平台控制台</a>
+          创建应用 → 添加 Key，<b>服务平台必须选「Web服务」</b>（选成「Web端(JS API)」会报错 10021），
+          把 32 位 Key 贴进来。个人开发者每天 5000 次，日常够用。
+        </div>
+        <div id="amapStatus" class="hint">加载中…</div>
+        <label>高德 Key</label>
+        <input id="amap_key" type="text" maxlength="64" placeholder="留空表示不修改已有 Key">
+        <div style="margin-top:14px"><button class="btn" id="saveAmap">保存</button></div>
+        <div class="hint">没填也能用：前台会退化成「跳高德/百度搜索」，只是页面里没有医院列表。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>公众号网页授权</h2>
+          <span class="tip">当前部署方式下不可用</span>
+        </div>
+
+        <div class="hint" style="border-left:3px solid #b4572f;background:#fbf3ec;padding:11px 13px;border-radius:2px;color:#8a4326;line-height:1.85;margin-bottom:14px">
+          <b>现在填了也不会生效，先别配。</b><br>
+          本站跑在平台托管域名上，平台要求所有请求都带分享码，微信抓取校验文件时会被拦成 403（已实测）；
+          该域名也不在你名下，过不了 ICP 备案验证。两项都卡死，微信侧无法完成校验。<br>
+          这组配置留到<b>迁到自有备案域名</b>后再填。在这之前，登录请继续用手机号注册，功能不受影响。
+        </div>
+
+        <div id="wxStatus" class="hint" style="line-height:1.85;margin-bottom:10px;display:flex;flex-direction:column;gap:6px">加载中…</div>
+        <label>AppID</label>
+        <input id="wx_appid" type="text" maxlength="64" placeholder="wx 开头，18 位，如 wx1234567890abcdef">
+        <label>AppSecret</label>
+        <input id="wx_appsecret" type="password" maxlength="128" placeholder="留空表示不修改已有 Secret">
+        <label>授权回调域名（不要带 https://）</label>
+        <input id="wx_redirect_domain" type="text" maxlength="120" placeholder="如 xiaochong.example.com">
+
+        <label style="margin-top:14px">域名校验文件（自有域名时使用）</label>
+        <input id="wx_verify_file" type="text" maxlength="80" placeholder="MP_verify_xxxxxxxx.txt，微信后台下载的文件名">
+        <textarea id="wx_verify_text" rows="3" maxlength="400" placeholder="把这个文件用记事本打开，里面那串字符原样贴进来"></textarea>
+        <div class="hint" style="margin-top:6px">
+          微信要求域名根目录能访问到校验文件。托管部署没法往根目录放文件，所以改由
+          <code>/MP_verify_xxxxxxxx.txt</code> 这个路由返回内容——但它同样会被平台网关拦成 403，
+          只有迁到自有域名后才走得通。
+        </div>
+
+        <div class="hint" style="margin-top:10px">
+          域名必须与公众号后台「设置与开发 → 公众号设置 → 功能设置 → 网页授权域名」填的一致，
+          否则微信会报 redirect_uri 参数错误。
+          接口路径：<code>/api/wx/login</code>（默认取昵称头像）、<code>/api/wx/login?silent=1</code>（静默，只拿 openid）。
+        </div>
+        <div style="margin-top:14px"><button class="btn" id="saveWx">保存公众号配置</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>数据备份</h2>
+          <span class="tip">账号、密码、反馈不会因更新丢失</span>
+        </div>
+        <div id="backupBox" class="hint" style="line-height:1.9">加载中…</div>
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn" id="backupRun">立即备份</button>
+          <span class="hint" style="margin:0">系统在注册、登录、保存配置后自动备份，启动时若数据缺失会自动恢复。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="back"><a href="/">← 返回问答页面</a></div>
+  </section>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var LS_PWD = 'xc_admin_pwd';
+  var STATE = { pwd: '', data: null };
+
+  var toastEl = document.getElementById('toast');
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.style.display = 'block';
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(function () { toastEl.style.display = 'none'; }, 2200);
+  }
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function num(n) { return (n == null ? 0 : n).toLocaleString('zh-CN'); }
+
+  // ============ 登录 ============
+  function doLogin(pwd) {
+    if (!pwd) { $('loginErr').textContent = '请输入管理员密码'; return; }
+    $('loginBtn').disabled = true;
+    $('loginBtn').textContent = '登录中…';
+    fetch('/api/admin/stats?password=' + encodeURIComponent(pwd))
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+      .then(function (res) {
+        $('loginBtn').disabled = false;
+        $('loginBtn').textContent = '进入后台';
+        if (res.status !== 200) {
+          $('loginErr').textContent = (res.d && res.d.error) || '密码错误';
+          return;
+        }
+        STATE.pwd = pwd;
+        try { localStorage.setItem(LS_PWD, pwd); } catch (e) {}
+        $('password').value = pwd;
+        $('loginErr').textContent = '';
+        $('loginPanel').style.display = 'none';
+        $('appPanel').style.display = 'block';
+        $('logoutBtn').style.display = 'inline-block';
+        renderAll(res.d);
+        loadAdminVersion();
+        loadCareBrief();
+  refreshStatus();
+      })
+      .catch(function () {
+        $('loginBtn').disabled = false;
+        $('loginBtn').textContent = '进入后台';
+        $('loginErr').textContent = '网络请求失败，请稍后重试';
+      });
+  }
+
+  $('loginBtn').addEventListener('click', function () { doLogin($('loginPwd').value.trim()); });
+  $('loginPwd').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin($('loginPwd').value.trim()); });
+
+  $('logoutBtn').addEventListener('click', function () {
+    try { localStorage.removeItem(LS_PWD); } catch (e) {}
+    STATE.pwd = ''; STATE.data = null;
+    $('loginPanel').style.display = 'block';
+    $('appPanel').style.display = 'none';
+    $('logoutBtn').style.display = 'none';
+    $('loginPwd').value = '';
+  });
+
+  // ============ Tabs ============
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  function switchTab(name) {
+    tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.tab === name); });
+    ['overview', 'accounts', 'feedback', 'users', 'care', 'content', 'news', 'config'].forEach(function (n) {
+      var el = $('panel-' + n);
+      if (el) el.style.display = (n === name) ? 'block' : 'none';
+    });
+    if (name === 'news') loadNewsAdmin();
+    if (name === 'accounts') loadAccounts(1);
+    if (name === 'feedback') loadFeedback(1);
+    if (name === 'care') loadCare();
+    if (name === 'config') loadBackup();
+  }
+
+  // ============ 数据备份 ============
+  function loadBackup() {
+    var box = $('backupBox');
+    if (!box) return;
+    fetch('/api/admin/backup?password=' + encodeURIComponent(STATE.pwd))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.error) { box.textContent = d.error; return; }
+        var f = d.files || {};
+        var kb = function (n) { return n ? (n / 1024).toFixed(1) + ' KB' : '未生成'; };
+        var latest = d.latest
+          ? d.latest.replace(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})$/, '$1-$2-$3 $4:$5')
+          : '暂无';
+        box.innerHTML = '当前账号 <b>' + (d.accounts || 0) + '</b> 个 · 已有快照 <b>' + (d.count || 0) + '</b> 份 · 最近备份 <b>' + esc(latest) + '</b><br>'
+          + '账号 ' + kb(f['accounts.json']) + ' · 配置 ' + kb(f['config.json']) + ' · 反馈 ' + kb(f['feedback.json']);
+      })
+      .catch(function () { box.textContent = '备份状态读取失败'; });
+  }
+
+  var backupRunBtn = $('backupRun');
+  if (backupRunBtn) {
+    backupRunBtn.addEventListener('click', function () {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = '备份中…';
+      fetch('/api/admin/backup/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: STATE.pwd })
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        btn.disabled = false;
+        btn.textContent = '立即备份';
+        toast(d.ok ? '已生成快照 ' + (d.name || '') : '备份失败');
+        loadBackup();
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = '立即备份';
+        toast('网络异常');
+      });
+    });
+  }
+
+  // ============ 用户反馈 ============
+  var FB = { page: 1, size: 15, status: '', data: null };
+
+  function loadFeedback(page) {
+    if (page) FB.page = page;
+    var box = $('fbTable');
+    if (box) box.innerHTML = '<div class="empty">加载中…</div>';
+    var url = '/api/admin/feedback?password=' + encodeURIComponent(STATE.pwd)
+      + '&page=' + FB.page + '&size=' + FB.size + '&status=' + encodeURIComponent(FB.status);
+    fetch(url)
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+      .then(function (res) {
+        if (res.status !== 200) {
+          box.innerHTML = '<div class="empty">' + esc((res.d && res.d.error) || '加载失败') + '</div>';
+          return;
+        }
+        renderFeedback(res.d);
+      })
+      .catch(function () { box.innerHTML = '<div class="empty">网络异常，请稍后重试</div>'; });
+  }
+
+  function fmtReplyTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts * 1000);
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ' 回复';
+  }
+
+  function renderFeedback(d) {
+    FB.data = d;
+    $('fbPending').innerHTML = num(d.pending) + '<small>条</small>';
+    $('fbToday').innerHTML = num(d.today) + '<small>条</small>';
+    $('fbTotal').innerHTML = num(d.total) + '<small>条</small>';
+
+    var badge = $('fbBadge');
+    if (badge) {
+      if (d.pending > 0) { badge.textContent = d.pending; badge.style.display = 'inline-block'; }
+      else { badge.style.display = 'none'; }
+    }
+
+    var items = d.items || [];
+    if (!items.length) {
+      $('fbTable').innerHTML = '<div class="empty">' + (FB.status ? '没有符合条件的反馈' : '还没有收到反馈') + '</div>';
+      $('fbPager').innerHTML = '';
+      return;
+    }
+
+    var h = '<div class="fb-list">';
+    items.forEach(function (it) {
+      var st = it.status || 'pending';
+      var replied = !!it.reply;
+      var stateTag = st === 'pending'
+        ? '<span class="acc-tag off">待处理</span>'
+        : (replied ? '<span class="acc-tag on">已回复</span>' : '<span class="acc-tag on">已关闭</span>');
+      h += '<div class="fb-item' + (st === 'pending' ? ' is-pending' : '') + '">'
+        + '<div class="fb-head">'
+        + '<span class="fb-type ' + (it.type === 'bug' ? 'bug' : (it.type === 'advice' ? 'advice' : (it.type === 'content' ? 'content' : ''))) + '">' + esc(it.type_name) + '</span>'
+        + stateTag
+        + '<span class="fb-who"><b>' + esc(it.nickname || it.phone || '匿名用户') + '</b><span>' + esc(it.date) + '</span></span>'
+        + '</div>'
+        + '<div class="fb-body">' + esc(it.content) + '</div>'
+        + (it.contact ? '<div class="fb-contact">联系方式：' + esc(it.contact) + '</div>' : '')
+        + (replied
+            ? '<div class="fb-reply"><div class="fb-reply-head"><span>客服回复</span><em>' + esc(fmtReplyTime(it.reply_ts)) + '</em></div>'
+              + '<div class="fb-reply-body">' + esc(it.reply) + '</div></div>'
+            : '')
+        + '<div class="fb-acts">'
+        + '<button class="primary" data-reply="' + esc(it.id) + '">' + (replied ? '再次回复' : '回复') + '</button>'
+        + (st === 'done'
+            ? '<button data-fid="' + esc(it.id) + '" data-act="pending">重新打开</button>'
+            : '<button data-fid="' + esc(it.id) + '" data-act="done" class="danger">关闭</button>')
+        + '</div></div>';
+    });
+    h += '</div>';
+    $('fbTable').innerHTML = h;
+
+    var pages = Math.max(1, Math.ceil((d.filtered || 0) / FB.size));
+    $('fbPager').innerHTML = '<button id="fbPrev"' + (FB.page <= 1 ? ' disabled' : '') + '>上一页</button>'
+      + '<span>第 ' + FB.page + ' / ' + pages + ' 页 · 共 ' + num(d.filtered) + ' 条</span>'
+      + '<button id="fbNext"' + (FB.page >= pages ? ' disabled' : '') + '>下一页</button>';
+    var prev = $('fbPrev'), next = $('fbNext');
+    if (prev) prev.addEventListener('click', function () { loadFeedback(FB.page - 1); });
+    if (next) next.addEventListener('click', function () { loadFeedback(FB.page + 1); });
+
+    // 回复按钮
+    Array.prototype.forEach.call($('fbTable').querySelectorAll('button[data-reply]'), function (b) {
+      b.addEventListener('click', function () {
+        var id = b.dataset.reply;
+        var row = items.filter(function (x) { return x.id === id; })[0] || {};
+        openFbReply(id, row.content || '', row.reply || '');
+      });
+    });
+
+    // 关闭 / 重新打开
+    Array.prototype.forEach.call($('fbTable').querySelectorAll('button[data-fid]'), function (b) {
+      b.addEventListener('click', function () {
+        b.disabled = true;
+        fetch('/api/admin/feedback/handle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: STATE.pwd, id: b.dataset.fid, action: b.dataset.act })
+        }).then(function (r) { return r.json(); }).then(function (res) {
+          if (res.error) { toast(res.error); b.disabled = false; return; }
+          toast(res.status === 'done' ? '已关闭该反馈' : '已重新打开');
+          loadFeedback();
+        }).catch(function () { b.disabled = false; toast('网络异常'); });
+      });
+    });
+  }
+
+  // ============ 回复弹窗 ============
+  var FB_REPLY_ID = '';
+
+  function updateFbCount() {
+    var n = ($('fbReplyText').value || '').length;
+    $('fbReplyCount').textContent = n + ' / 1000';
+  }
+
+  function openFbReply(id, quote, oldReply) {
+    FB_REPLY_ID = id;
+    $('fbQuote').textContent = quote || '';
+    $('fbReplyText').value = oldReply || '';
+    updateFbCount();
+    $('fbMask').classList.add('show');
+    setTimeout(function () { $('fbReplyText').focus(); }, 60);
+  }
+
+  function closeFbReply() {
+    $('fbMask').classList.remove('show');
+    $('fbSend').disabled = false;
+    $('fbSend').textContent = '发送回复';
+  }
+
+  if ($('fbReplyText')) {
+    $('fbReplyText').addEventListener('input', updateFbCount);
+  }
+  if ($('fbClose')) $('fbClose').addEventListener('click', closeFbReply);
+  if ($('fbCancel')) $('fbCancel').addEventListener('click', closeFbReply);
+  if ($('fbMask')) {
+    $('fbMask').addEventListener('click', function (e) {
+      if (e.target === $('fbMask')) closeFbReply();
+    });
+  }
+  if ($('fbSend')) {
+    $('fbSend').addEventListener('click', function () {
+      var txt = ($('fbReplyText').value || '').trim();
+      if (txt.length < 2) { toast('回复内容太短'); $('fbReplyText').focus(); return; }
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = '发送中…';
+      fetch('/api/admin/feedback/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: STATE.pwd, id: FB_REPLY_ID, reply: txt })
+      }).then(function (r) { return r.json(); }).then(function (res) {
+        if (res.error) {
+          toast(res.error);
+          btn.disabled = false;
+          btn.textContent = '发送回复';
+          return;
+        }
+        toast('回复已发送，用户下次打开客服面板可见');
+        closeFbReply();
+        loadFeedback();
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = '发送回复';
+        toast('网络异常，请重试');
+      });
+    });
+  }
+
+  var fbFilter = $('fbFilter');
+  if (fbFilter) {
+    fbFilter.addEventListener('change', function () {
+      FB.status = fbFilter.value;
+      loadFeedback(1);
+    });
+  }
+  var fbRefresh = $('fbRefresh');
+  if (fbRefresh) fbRefresh.addEventListener('click', function () { loadFeedback(); });
+
+  // ============ 用户管理 ============
+  var ACC = { page: 1, q: '', size: 20, data: null };
+
+  function fmtTs(ts) {
+    if (!ts) return '—';
+    var d = new Date(ts * 1000);
+    function p(n) { return ('0' + n).slice(-2); }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  // 新用户 = 注册不满 7 天，跟汇总条同一口径
+  function isNewUser(u) {
+    return (u.created || 0) >= Math.floor(Date.now() / 1000) - 7 * 86400;
+  }
+
+  // 秒 → 「2 小时 14 分」。不写小数点，后台看的是量级，不是秒表。
+  function fmtDur(sec) {
+    sec = Math.max(0, Math.round(sec || 0));
+    if (!sec) return '—';
+    if (sec < 60) return '不足 1 分';
+    var m = Math.round(sec / 60);
+    if (m < 60) return m + ' 分';
+    var h = Math.floor(m / 60), mm = m % 60;
+    return h + ' 小时' + (mm ? ' ' + mm + ' 分' : '');
+  }
+
+  // 登录次数与使用时长放在一格：上面次数，下面累计和今日，鼠标停住看最近在线
+  function usageCell(u) {
+    var logins = u.logins || 0;
+    var tracked = !!u.usage_tracked;
+    var total = tracked ? fmtDur(u.usage_seconds) : '—';
+    var today = u.usage_today ? fmtDur(u.usage_today) : '';
+    var tip = tracked
+      ? '累计使用 ' + total + (today ? '，今天 ' + today : '')
+        + '，最近在线 ' + (u.last_seen ? fmtTs(u.last_seen) : '—')
+      : '这个账号还没上报过使用时长：统计从升级后开始，之前的时长无法还原';
+    return '<div class="acc-use" title="' + esc(tip) + '">'
+      + '<b>' + (logins ? num(logins) + ' 次' : '—') + '</b>'
+      + '<span>' + (tracked
+          ? '累计 ' + total + (today ? ' · 今日 ' + today : '')
+          : '活跃 ' + num(u.active_days || 0) + ' 天 · 时长未记录')
+      + '</span>'
+      + '</div>';
+  }
+
+  function renderSplit(u) {
+    var box = $('accSplit');
+    if (!box) return;
+    if (!u || !u.new) { box.innerHTML = ''; return; }
+    function line(label, tip, d, cls) {
+      return '<div class="acc-split-item ' + cls + '">'
+        + '<span class="as-label">' + label + '<i>' + tip + '</i></span>'
+        + '<span class="as-num">' + num(d.users) + ' 人</span>'
+        + '<span class="as-sub">登录 ' + num(d.logins) + ' 次 · 使用 ' + fmtDur(d.seconds) + '</span>'
+        + '</div>';
+    }
+    var since = u.since ? fmtTs(u.since).slice(0, 10) : '本次升级';
+    box.innerHTML = '<div class="acc-split-row">'
+      + line('新用户', '7 天内注册', u.new, 'new')
+      + line('老用户', '7 天前注册', u.old, 'old')
+      + '</div>'
+      + '<div class="acc-split-note">使用时长自 ' + esc(since) + ' 起累计，之前的无法还原；'
+      + '只算页面在前台、且三分钟内有操作的时间，挂着不动的窗口不计。'
+      + '登录次数按输密码 / 微信授权计，保持登录状态自动进入不重复计；'
+      + '升级前的老账号按「至少登录过 1 次」起算。'
+      + '登录态每天夜里 12 点重置，跨天后重进要再登录一次，所以一个人第二天会多计 1 次登录。'
+      + '今日在线 ' + num(u.active_today || 0) + ' 人。</div>';
+  }
+
+  function loadAccounts(page) {
+    if (page) ACC.page = page;
+    var box = $('accTable');
+    if (box) box.innerHTML = '<div class="empty">加载中…</div>';
+    var url = '/api/admin/users?password=' + encodeURIComponent(STATE.pwd)
+      + '&page=' + ACC.page + '&size=' + ACC.size + '&q=' + encodeURIComponent(ACC.q);
+    fetch(url)
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+      .then(function (res) {
+        if (res.status !== 200) {
+          box.innerHTML = '<div class="empty">' + esc((res.d && res.d.error) || '加载失败') + '</div>';
+          return;
+        }
+        renderAccounts(res.d);
+      })
+      .catch(function () { box.innerHTML = '<div class="empty">网络异常，请稍后重试</div>'; });
+  }
+
+  // 用户 IP：主行是最近访问 IP，下面一行小字是记录时间；
+  // 注册 IP 与最近 IP 不一致时挂在 title 上，鼠标一停就能看到。
+  function ipCell(u) {
+    var ip = u.last_ip || u.reg_ip || '';
+    if (!ip) {
+      // 别只画一个破折号，看不出是「没记录」还是「加载失败」
+      return '<div class="acc-ip none" title="该账号还没有上报过 IP，下次打开页面后自动补全">未记录</div>';
+    }
+    var loc = u.last_ip_loc || '';
+    var n = u.ip_shared || 0;      // 全量口径，由服务端算好
+
+    var title = [];
+    if (u.last_ip_isp) title.push('运营商 ' + u.last_ip_isp);
+    title.push('IP ' + ip);
+    if (u.reg_ip && u.reg_ip !== u.last_ip) {
+      title.push('注册 IP ' + u.reg_ip + (u.reg_ip_loc ? '（' + u.reg_ip_loc + '）' : ''));
+    }
+    if (n > 1) title.push('该 IP 下有 ' + n + ' 个账号');
+
+    var t = '';
+    if (u.last_ip_ts) {
+      var d = new Date(u.last_ip_ts * 1000);
+      function p(x) { return ('0' + x).slice(-2); }
+      t = p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+    var badge = n > 1 ? '<i class="acc-ip-share">同IP ' + n + '</i>' : '';
+    // 有归属地就主显地名，原始 IP 退到第二行小字；查不到时退回 IP，不留空
+    var main = loc || ip;
+    var sub = loc ? ip + (t ? ' · ' + t : '') : t;
+    return '<div class="acc-ip" title="' + esc(title.join(' · ')) + '">'
+      + '<b>' + esc(main) + '</b>' + badge
+      + (sub ? '<span>' + esc(sub) + '</span>' : '') + '</div>';
+  }
+
+  function renderAccounts(d) {
+    ACC.data = d;
+    renderSplit(d.usage);
+    var sm = d.summary || {};
+    $('accTotal').innerHTML = num(sm.total) + '<small>人</small>';
+    $('accTotalTip').textContent = '停用 ' + (sm.disabled || 0) + ' 个';
+    $('accNew').innerHTML = num(sm.new_today) + '<small>人</small>';
+    $('accActive').innerHTML = num(sm.active_today) + '<small>人</small>';
+    $('accActiveTip').textContent = '近 7 天 ' + num(sm.active_7d) + ' · 近 30 天 ' + num(sm.active_30d);
+    $('accWx').innerHTML = num(sm.wechat_users) + '<small>人</small>';
+    $('accWxTip').textContent = '手机号注册 ' + num((sm.total || 0) - (sm.wechat_users || 0));
+
+    var items = d.items || [];
+    if (!items.length) {
+      $('accTable').innerHTML = '<div class="empty">暂无用户</div>';
+      $('accPager').innerHTML = '';
+      return;
+    }
+
+    var h = '<table><thead><tr>'
+      + '<th>用户</th><th>手机号</th><th class="acc-ip-th" title="最近一次访问的 IP 归属地">归属地</th>'
+      + '<th class="acc-hide-sm">注册时间</th><th class="acc-hide-sm">最近登录</th>'
+      + '<th title="登录次数 / 累计与今日使用时长">登录 / 使用</th>'
+      + '<th>提问</th><th>状态</th><th>操作</th>'
+      + '</tr></thead><tbody>';
+    items.forEach(function (u) {
+      var tag = u.disabled
+        ? '<span class="acc-tag off">已停用</span>'
+        : '<span class="acc-tag on">正常</span>';
+      if (u.bind_wechat) tag += ' <span class="acc-tag wx">微信</span>';
+      h += '<tr>'
+        + '<td><b>' + esc(u.nickname || '—') + '</b>' + (isNewUser(u) ? '<span class="acc-tag new">新</span>' : '') + '</td>'
+        + '<td>' + esc(u.phone_masked || '—') + '</td>'
+        + '<td class="acc-ip-td">' + ipCell(u) + '</td>'
+        + '<td class="acc-hide-sm">' + fmtTs(u.created) + '</td>'
+        + '<td class="acc-hide-sm">' + fmtTs(u.last_login) + '</td>'
+        + '<td class="acc-use-td">' + usageCell(u) + '</td>'
+        + '<td>' + num(u.questions || 0) + '</td>'
+        + '<td>' + tag + '</td>'
+        + '<td><div class="acc-act">'
+        + '<button data-uid="' + esc(u.uid) + '" data-act="reset">重置密码</button>'
+        + '<button class="' + (u.disabled ? '' : 'danger') + '" data-uid="' + esc(u.uid)
+        + '" data-act="toggle" data-disabled="' + (u.disabled ? '1' : '0') + '">'
+        + (u.disabled ? '恢复' : '停用') + '</button>'
+        + '<button class="danger" data-uid="' + esc(u.uid) + '" data-act="del">删除</button>'
+        + '</div></td>'
+        + '</tr>';
+    });
+    h += '</tbody></table>';
+    $('accTable').innerHTML = h;
+
+    var pages = Math.max(1, Math.ceil((d.total || 0) / ACC.size));
+    $('accPager').innerHTML = '<button id="accPrev"' + (ACC.page <= 1 ? ' disabled' : '') + '>上一页</button>'
+      + '<span>第 ' + ACC.page + ' / ' + pages + ' 页 · 共 ' + num(d.total) + ' 人</span>'
+      + '<button id="accNext"' + (ACC.page >= pages ? ' disabled' : '') + '>下一页</button>';
+    var prev = $('accPrev'), next = $('accNext');
+    if (prev) prev.addEventListener('click', function () { loadAccounts(ACC.page - 1); });
+    if (next) next.addEventListener('click', function () { loadAccounts(ACC.page + 1); });
+  }
+
+  function bindAccountActions() {
+    var box = $('accTable');
+    if (!box) return;
+    box.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-act]');
+      if (!btn) return;
+      var uid = btn.dataset.uid;
+      var act = btn.dataset.act;
+      if (act === 'reset') {
+        var pwd = window.prompt('为该用户设置新密码（至少 6 位）');
+        if (!pwd) return;
+        if (pwd.length < 6) { toast('密码至少 6 位'); return; }
+        fetch('/api/admin/users/reset', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: STATE.pwd, uid: uid, password_new: pwd })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          toast(d && d.error ? d.error : '密码已重置');
+        }).catch(function () { toast('网络异常'); });
+      } else if (act === 'del') {
+        if (!window.confirm('彻底删除该账号？其档案、温湿度记录、饲养日志、诊断记录会一并删除，无法恢复。')) return;
+        fetch('/api/admin/users/delete', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: STATE.pwd, uid: uid })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          toast(d && d.error ? d.error : '账号已删除');
+          if (!d || !d.error) loadAccounts(ACC.page);
+        }).catch(function () { toast('网络异常'); });
+      } else if (act === 'toggle') {
+        var disabled = btn.dataset.disabled === '1';
+        var tip = disabled ? '确定恢复该用户的使用权限？' : '确定停用该用户？停用后将无法登录。';
+        if (!window.confirm(tip)) return;
+        fetch('/api/admin/users/status', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: STATE.pwd, uid: uid, disabled: !disabled })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          toast(d && d.error ? d.error : (disabled ? '已恢复' : '已停用'));
+          loadAccounts(ACC.page);
+        }).catch(function () { toast('网络异常'); });
+      }
+    });
+
+    var input = $('accSearch');
+    if (input) {
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { ACC.q = input.value.trim(); loadAccounts(1); }
+      });
+    }
+    var sb = $('accSearchBtn');
+    if (sb) {
+      sb.addEventListener('click', function () {
+        ACC.q = ($('accSearch').value || '').trim();
+        loadAccounts(1);
+      });
+    }
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { switchTab(t.dataset.tab); });
+  });
+  bindAccountActions();
+
+  // ============ 图表：折线 ============
+  function niceMax(v) {
+    // 让 Y 轴 4 等分后都是整数、且步长是好读的数
+    if (v <= 4) return 4;
+    var raw = v / 4;
+    var mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var mults = [1, 2, 2.5, 3, 4, 5, 6, 8, 10];
+    var step = 10 * mag;
+    for (var i = 0; i < mults.length; i++) {
+      if (mults[i] * mag >= raw) { step = mults[i] * mag; break; }
+    }
+    return step * 4;
+  }
+
+  function lineChart(points, opts) {
+    opts = opts || {};
+    var narrow = (window.innerWidth || 1024) < 560;
+    var W = narrow ? 430 : 760, H = narrow ? 220 : (opts.height || 210);
+    var pad = { l: narrow ? 26 : 38, r: 12, t: 16, b: narrow ? 30 : 26 };
+    var iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+    var maxV = 1;
+    points.forEach(function (p) { maxV = Math.max(maxV, p.value); });
+    var max = niceMax(maxV);
+    var n = points.length;
+    var step = n > 1 ? iw / (n - 1) : 0;
+
+    function x(i) { return pad.l + i * step; }
+    function y(v) { return pad.t + ih - (v / max) * ih; }
+
+    var gid = 'g' + Math.random().toString(36).slice(2, 8);
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">';
+    s += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0" stop-color="#1E4634" stop-opacity=".26"/>'
+      + '<stop offset="1" stop-color="#1E4634" stop-opacity="0"/></linearGradient></defs>';
+
+    // 网格 + y 轴
+    for (var g = 0; g <= 4; g++) {
+      var gy = pad.t + ih - (ih * g / 4);
+      var gv = Math.round(max * g / 4);
+      s += '<line x1="' + pad.l + '" y1="' + gy + '" x2="' + (W - pad.r) + '" y2="' + gy
+        + '" stroke="#E4DDCC" stroke-width="1"/>';
+      s += '<text x="' + (pad.l - 8) + '" y="' + (gy + 3.5) + '" text-anchor="end" font-size="11" fill="#8A9088">'
+        + gv + '</text>';
+    }
+
+    // 面积
+    var area = 'M' + x(0) + ',' + (pad.t + ih);
+    points.forEach(function (p, i) { area += ' L' + x(i) + ',' + y(p.value); });
+    area += ' L' + x(n - 1) + ',' + (pad.t + ih) + ' Z';
+    s += '<path d="' + area + '" fill="url(#' + gid + ')"/>';
+
+    // 折线
+    var line = '';
+    points.forEach(function (p, i) {
+      line += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(p.value) + ' ';
+    });
+    s += '<path d="' + line + '" fill="none" stroke="#1E4634" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>';
+
+    // 数据点（点数少时全画，多时只画末点）
+    var showAll = n <= 14;
+    points.forEach(function (p, i) {
+      if (showAll || i === n - 1) {
+        s += '<circle cx="' + x(i) + '" cy="' + y(p.value) + '" r="' + (i === n - 1 ? 3.6 : 2.6)
+          + '" fill="#fff" stroke="#1E4634" stroke-width="2"/>';
+      }
+    });
+
+    // x 轴标签（最多 7 个）
+    var every = Math.max(1, Math.ceil(n / 7));
+    points.forEach(function (p, i) {
+      if (i % every === 0 || i === n - 1) {
+        s += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#8A9088">'
+          + esc(p.label) + '</text>';
+      }
+    });
+
+    s += '</svg>';
+    return s;
+  }
+
+  // 新增设备用第二条线（虚线）
+  function lineChart2(points, points2, opts) {
+    opts = opts || {};
+    var narrow = (window.innerWidth || 1024) < 560;
+    var W = narrow ? 430 : 760, H = narrow ? 220 : (opts.height || 210);
+    var pad = { l: narrow ? 26 : 38, r: 12, t: 16, b: narrow ? 30 : 26 };
+    var iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+    var maxV = 1;
+    points.concat(points2).forEach(function (p) { maxV = Math.max(maxV, p.value); });
+    var max = niceMax(maxV);
+    var n = points.length;
+    var step = n > 1 ? iw / (n - 1) : 0;
+    function x(i) { return pad.l + i * step; }
+    function y(v) { return pad.t + ih - (v / max) * ih; }
+
+    var gid = 'g' + Math.random().toString(36).slice(2, 8);
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">';
+    s += '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0" stop-color="#1E4634" stop-opacity=".24"/>'
+      + '<stop offset="1" stop-color="#1E4634" stop-opacity="0"/></linearGradient></defs>';
+    for (var g = 0; g <= 4; g++) {
+      var gy = pad.t + ih - (ih * g / 4);
+      s += '<line x1="' + pad.l + '" y1="' + gy + '" x2="' + (W - pad.r) + '" y2="' + gy + '" stroke="#E4DDCC"/>';
+      s += '<text x="' + (pad.l - 8) + '" y="' + (gy + 3.5) + '" text-anchor="end" font-size="11" fill="#8A9088">'
+        + Math.round(max * g / 4) + '</text>';
+    }
+    var area = 'M' + x(0) + ',' + (pad.t + ih);
+    points.forEach(function (p, i) { area += ' L' + x(i) + ',' + y(p.value); });
+    area += ' L' + x(n - 1) + ',' + (pad.t + ih) + ' Z';
+    s += '<path d="' + area + '" fill="url(#' + gid + ')"/>';
+
+    var l1 = '', l2 = '';
+    points.forEach(function (p, i) { l1 += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(p.value) + ' '; });
+    points2.forEach(function (p, i) { l2 += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(p.value) + ' '; });
+    s += '<path d="' + l1 + '" fill="none" stroke="#1E4634" stroke-width="2.2" stroke-linejoin="round"/>';
+    s += '<path d="' + l2 + '" fill="none" stroke="#B4572F" stroke-width="1.8" stroke-dasharray="4 3" stroke-linejoin="round"/>';
+
+    var every = Math.max(1, Math.ceil(n / 7));
+    points.forEach(function (p, i) {
+      if (i % every === 0 || i === n - 1) {
+        s += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#8A9088">'
+          + esc(p.label) + '</text>';
+      }
+    });
+    s += '</svg>';
+    return s;
+  }
+
+  function barChart(items, opts) {
+    opts = opts || {};
+    var max = 1, allZero = true;
+    items.forEach(function (x) { max = Math.max(max, x.value); if (x.value > 0) allZero = false; });
+    if (allZero) {
+      return '<div class="chart-empty">' + (opts.empty || '暂无数据') + '</div>';
+    }
+    var html = '<div class="bars">';
+    items.forEach(function (x) {
+      var h = Math.round(x.value / max * 100);
+      html += '<div class="bar-col' + (x.value ? '' : ' dim') + '">'
+        + '<div class="bar-val">' + x.value + '</div>'
+        + '<div class="bar" style="height:' + (x.value ? Math.max(h, 3) : 3) + '%"></div>'
+        + '<div class="bar-lbl">' + esc(x.label) + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  // ============ 渲染 ============
+  function renderAll(d) {
+    STATE.data = d;
+    var a = (d && d.analytics) || {};
+    var ov = a.overview || {};
+    var t = (d && d.totals) || {};
+
+    // 概览 KPI
+    $('kpiDau').innerHTML = num(ov.dau) + '<small>人</small>';
+    $('kpiDauDelta').innerHTML = deltaText(ov.dau_change, '昨日', ov.dau_yesterday);
+
+    $('kpiMau').innerHTML = num(ov.mau) + '<small>人</small>';
+    $('kpiMauDelta').innerHTML = deltaText(ov.mau_change, '上周期', ov.mau_prev);
+
+    $('kpiSticky').innerHTML = (ov.stickiness || 0) + '<small>%</small>';
+    $('kpiStickyTip').textContent = '日活 ÷ 月活，反映使用频次';
+
+    $('kpiUsers').innerHTML = num(ov.total_devices) + '<small>人</small>';
+    $('kpiUsersTip').textContent = '近7天活跃 ' + num(ov.wau) + ' · 近30天 ' + num(ov.mau);
+
+    $('kpiNew').innerHTML = num(ov.new_today) + '<small>人</small>';
+    $('kpiNewTip').textContent = '近7天新增 ' + num(ov.new_7d) + ' · 近30天 ' + num(ov.new_30d);
+
+    $('kpiQ').innerHTML = num(ov.questions_today) + '<small>次</small>';
+    $('kpiQTip').textContent = '累计 ' + num(ov.questions_total) + ' 次';
+
+    $('kpiR1').innerHTML = (ov.retention_d1 || 0) + '<small>%</small>';
+    $('kpiR1Tip').textContent = '7日留存 ' + (ov.retention_d7 || 0) + '%';
+
+    $('kpiOk').innerHTML = Math.round((t.success_rate || 0) * 100) + '<small>%</small>';
+    $('kpiOkTip').textContent = '知识命中 ' + Math.round((t.knowledge_hit_rate || 0) * 100) + '%';
+
+    // 30 天日活
+    var trend = a.dau_trend || [];
+    var pts = trend.map(function (x) { return { label: x.label, value: x.dau }; });
+    var ptsNew = trend.map(function (x) { return { label: x.label, value: x.new }; });
+    if (pts.length) {
+      $('dauChart').innerHTML = lineChart2(pts, ptsNew);
+      $('dauChart2').innerHTML = lineChart2(pts, ptsNew, { height: 240 });
+    } else {
+      $('dauChart').innerHTML = '<div class="empty">暂无数据</div>';
+      $('dauChart2').innerHTML = '<div class="empty">暂无数据</div>';
+    }
+
+    // 月活
+    var mau = a.mau_trend || [];
+    var mauItems = mau.map(function (x) { return { label: x.label, value: x.mau }; });
+    $('mauChart').innerHTML = mauItems.length ? barChart(mauItems) : '<div class="empty">暂无数据</div>';
+    $('mauChart2').innerHTML = mauItems.length ? barChart(mauItems) : '<div class="empty">暂无数据</div>';
+
+    // 活跃分层
+    var tier = a.tier || [];
+    if (tier.length) {
+      var total = Math.max(1, ov.total_devices || 1);
+      $('tierBox').innerHTML = tier.map(function (x, i) {
+        var w = Math.max(2, Math.round(x.count / total * 100));
+        return '<div class="tier-row">'
+          + '<div class="tier-name">' + esc(x.name) + '</div>'
+          + '<div class="tier-track"><div class="tier-fill' + (i === 3 ? ' grey' : '') + '" style="width:' + w + '%"></div></div>'
+          + '<div class="tier-cnt">' + x.count + ' 人</div>'
+          + '</div>';
+      }).join('');
+    } else {
+      $('tierBox').innerHTML = '<div class="empty">暂无数据</div>';
+    }
+
+    // 留存
+    $('retentionBox').innerHTML =
+      '<div class="kpi-grid mini" style="grid-template-columns:1fr 1fr;margin-bottom:0">'
+      + '<div class="kpi" style="box-shadow:none"><div class="kpi-label">次日留存</div><div class="kpi-value">'
+      + (ov.retention_d1 || 0) + '<small>%</small></div><div class="kpi-delta">样本 ' + (ov.d1_base || 0) + ' 人</div></div>'
+      + '<div class="kpi blue" style="box-shadow:none"><div class="kpi-label">7 日留存</div><div class="kpi-value">'
+      + (ov.retention_d7 || 0) + '<small>%</small></div><div class="kpi-delta">样本 ' + (ov.d7_base || 0) + ' 人</div></div>'
+      + '</div>'
+      + '<div class="hint">留存 = 首次访问后第 2 天（或 7 天内）再次活跃的用户占比。样本量较小时波动较大，建议积累一段时间再看。</div>';
+
+    // 时段分布
+    var hours = a.hour_dist || [];
+    var hourTotal = 0;
+    hours.forEach(function (h) { hourTotal += (h.count || 0); });
+    var hourItems = hours.filter(function (h) { return h.hour % 3 === 0; })
+      .map(function (h) { return { label: h.hour + '时', value: h.count }; });
+    $('hourChart').innerHTML = hourTotal
+      ? barChart(hourItems, { height: 150 })
+      : '<div class="empty">暂无提问记录</div>';
+
+    // 活跃用户 TOP
+    var top = a.top_devices || [];
+    if (top.length) {
+      $('topDevices').innerHTML = '<table><thead><tr><th>设备</th><th>活跃天数</th><th>提问数</th><th>首次访问</th><th>最近访问</th></tr></thead><tbody>'
+        + top.map(function (x) {
+          return '<tr><td>' + esc(x.device) + '</td><td class="num">' + x.days + '</td><td class="num">'
+            + x.questions + '</td><td class="num">' + esc(x.first || '-') + '</td><td class="num">' + esc(x.last) + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    } else {
+      $('topDevices').innerHTML = '<div class="empty">暂无数据</div>';
+    }
+
+    // 内容分析
+    $('cTotal').textContent = num(t.questions);
+    $('cHit').innerHTML = Math.round((t.knowledge_hit_rate || 0) * 100) + '<small>%</small>';
+    $('cLat').innerHTML = (t.avg_latency_ms || 0) + '<small>ms</small>';
+    $('cPer').innerHTML = (ov.q_per_user || 0) + '<small>次</small>';
+
+    var daily7 = (d.daily || []).map(function (x) { return { label: x.date, value: x.count }; });
+    $('qChart7').innerHTML = daily7.length ? barChart(daily7) : '<div class="empty">暂无数据</div>';
+
+    renderFunnel(a.funnel || [], a.funnel_note);
+    renderChannels(a.channels || []);
+    renderChannelTable(a.channels || []);
+    renderTopQuestions(d.top_questions || []);
+    renderSpecies(d.species_dist || []);
+    renderGaps(d.knowledge_gaps || [], d.gap_total || 0);
+    renderRecent(d.recent || []);
+
+    var now = new Date();
+    $('hdrSub').textContent = '数据更新于 ' + now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function deltaText(change, prefix, base) {
+    if (base === undefined || base === null) return prefix;
+    var c = change || 0;
+    var cls = c > 0 ? 'up' : (c < 0 ? 'down' : '');
+    var sign = c > 0 ? '+' : '';
+    return '<span class="' + cls + '">' + sign + c + '%</span> · ' + prefix + ' ' + base + ' 人';
+  }
+
+  // 后台版本号：独立于前台「小宠百问」，两者分别迭代
+  function loadAdminVersion() {
+    fetch('/api/health').then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.admin_version) return;
+      var el = $('adminVer');
+      if (el) el.textContent = '后台 v' + d.admin_version;
+    }).catch(function () {});
+  }
+
+  function renderFunnel(list, note) {
+    var el = $('funnelBox');
+    if (!list || !list.length) { el.innerHTML = '<div class="empty">暂无数据</div>'; return; }
+    var max = list[0].count || 1;
+    var noteHtml = '';
+    if (note && note.count !== undefined) {
+      noteHtml = '<div class="fn-note">另有 <b>' + note.count + ' 人</b> 隔天回访，占全部访客 <b>' + note.rate
+        + '%</b>，占提过问题用户的 <b>' + note.back_rate + '%</b></div>';
+    }
+    el.innerHTML = '<div class="fn-head"><div class="fn-label">环节</div><div class="fn-bar-wrap">人数</div>'
+      + '<div class="fn-rate">环节转化</div><div class="fn-total">总体转化</div></div>'
+      + list.map(function (f, i) {
+        var w = max ? Math.max((f.count / max) * 100, 2) : 2;
+        return '<div class="fn-row">'
+          + '<div class="fn-label">' + esc(f.name) + '</div>'
+          + '<div class="fn-bar-wrap"><div class="fn-bar" style="width:' + w + '%"></div>'
+          + '<span class="fn-count">' + f.count + ' 人</span></div>'
+          + '<div class="fn-rate">' + (i === 0 ? '—' : f.step + '%') + '</div>'
+          + '<div class="fn-total">' + f.total + '%</div>'
+          + '</div>';
+      }).join('') + noteHtml;
+  }
+
+  function renderChannels(list) {
+    var el = $('channelBox');
+    if (!list || !list.length) { el.innerHTML = '<div class="empty">暂无来源数据</div>'; return; }
+    var total = 0;
+    list.forEach(function (x) { total += x.uv || 0; });
+    if (!total) total = 1;
+    el.innerHTML = list.map(function (x) {
+      var w = Math.round((x.uv || 0) / total * 100);
+      return '<div class="dist-row">'
+        + '<div class="ch-name" title="' + esc(x.key) + '">' + esc(x.name) + '</div>'
+        + '<div class="dist-track"><div class="dist-fill" style="width:' + Math.max(w, 1) + '%"></div></div>'
+        + '<div class="ch-cnt">' + (x.uv || 0) + ' 人 · ' + w + '%</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  function renderChannelTable(list) {
+    var el = $('channelTable');
+    if (!list || !list.length) { el.innerHTML = '<div class="empty">暂无来源数据</div>'; return; }
+    var narrow = (window.innerWidth || 1024) < 560;
+    var total = 0;
+    var sum = { uv: 0, q_users: 0, q2: 0, q: 0, new30: 0 };
+    list.forEach(function (x) {
+      total += x.uv || 0;
+      sum.uv += x.uv || 0;
+      sum.q_users += x.q_users || 0;
+      sum.q2 += x.q2_users || 0;
+      sum.q += x.q || 0;
+      sum.new30 += x.new_30d || 0;
+    });
+    if (!total) total = 1;
+    var rate = function (a, b) { return b ? Math.round(a / b * 1000) / 10 : 0; };
+    var avg = function (a, b) { return b ? Math.round(a / b * 100) / 100 : 0; };
+
+    var head = narrow
+      ? ['渠道', '占比', '用户', '提问人', '提问率', '30 天新增']
+      : ['渠道', '占比', '用户数', '提问用户', '提问率', '多问率', '人均提问', '近 30 天新增'];
+
+    function tr(cells) {
+      return '<tr>' + cells.map(function (c, i) {
+        return i === 0 ? '<td>' + c + '</td>' : '<td class="num">' + c + '</td>';
+      }).join('') + '</tr>';
+    }
+
+    var body = list.map(function (x) {
+      var ask = x.ask_rate || 0;
+      var cls = ask >= 60 ? 'good' : (ask >= 30 ? 'mid' : 'low');
+      var pill = '<span class="pill ' + cls + '">' + ask + '%</span>';
+      var share = Math.round((x.uv || 0) / total * 100) + '%';
+      if (narrow) {
+        return tr([esc(x.name), share, x.uv || 0, x.q_users || 0, pill, x.new_30d || 0]);
+      }
+      return tr([esc(x.name), share, x.uv || 0, x.q_users || 0, pill,
+        (x.multi_rate || 0) + '%', x.q_rate || 0, x.new_30d || 0]);
+    }).join('');
+
+    var foot = narrow
+      ? tr(['合计', '100%', sum.uv, sum.q_users, rate(sum.q_users, sum.uv) + '%', sum.new30])
+      : tr(['合计', '100%', sum.uv, sum.q_users, rate(sum.q_users, sum.uv) + '%',
+        rate(sum.q2, sum.uv) + '%', avg(sum.q, sum.uv), sum.new30]);
+
+    el.innerHTML = '<table><thead><tr>'
+      + head.map(function (t) { return '<th>' + t + '</th>'; }).join('')
+      + '</tr></thead><tbody>' + body + '</tbody><tfoot>' + foot + '</tfoot></table>';
+  }
+
+  function renderTopQuestions(list) {
+    var el = $('topQuestions');
+    if (!list.length) { el.innerHTML = '<div class="empty">暂无数据</div>'; return; }
+    el.innerHTML = list.map(function (x, i) {
+      return '<div class="rank-row"><div class="rank-idx">' + (i + 1) + '</div>'
+        + '<div class="rank-q" title="' + esc(x.q) + '">' + esc(x.q) + '</div>'
+        + '<div class="rank-cnt">' + x.count + ' 次</div></div>';
+    }).join('');
+  }
+
+  function renderGaps(list, total) {
+    var el = $('knowledgeGaps');
+    var tip = $('gapTip');
+    if (tip) {
+      tip.textContent = total
+        ? '共 ' + total + ' 个问题未命中知识库，按出现次数排序'
+        : '未命中知识库的问题，按出现次数排序';
+    }
+    if (!list.length) {
+      el.innerHTML = '<div class="empty">' + (total ? '暂无盲区，问题都能命中知识库' : '暂无数据，有提问后自动统计') + '</div>';
+      return;
+    }
+    el.innerHTML = list.map(function (x, i) {
+      return '<div class="rank-row"><div class="rank-idx">' + (i + 1) + '</div>'
+        + '<div class="rank-q" title="' + esc(x.q) + '">' + esc(x.q)
+        + (x.last ? ' <span style="color:#8A9088;font-size:11.5px">· ' + esc(x.last) + '</span>' : '')
+        + '</div><div class="rank-cnt">' + x.count + ' 次</div></div>';
+    }).join('');
+  }
+
+  function renderSpecies(list) {
+    var el = $('speciesDist');
+    if (!list.length) { el.innerHTML = '<div class="empty">暂无数据</div>'; return; }
+    var max = 1;
+    list.forEach(function (x) { if (x.count > max) max = x.count; });
+    el.innerHTML = list.map(function (x) {
+      var w = Math.round(x.count / max * 100);
+      return '<div class="dist-row"><div class="dist-name">' + esc(x.species) + '</div>'
+        + '<div class="dist-track"><div class="dist-fill" style="width:' + w + '%"></div></div>'
+        + '<div class="dist-cnt">' + x.count + '</div></div>';
+    }).join('');
+  }
+
+  function renderRecent(list) {
+    var el = $('recentList');
+    if (!list.length) { el.innerHTML = '<div class="empty">暂无数据</div>'; return; }
+    el.innerHTML = list.map(function (x) {
+      var sp = (x.species && x.species.length) ? x.species[0] : '';
+      return '<div class="rec-row"><div class="rec-time">' + esc(x.time) + '</div>'
+        + '<div class="rec-q" title="' + esc(x.question || '') + '">' + esc(x.question || '') + '</div>'
+        + (sp ? '<div class="rec-species">' + esc(sp) + '</div>' : '')
+        + '<div class="rec-ok ' + (x.ok ? 'ok' : 'fail') + '">' + (x.ok ? '成功' : '失败') + '</div>'
+        + '<div class="rec-lat">' + (x.latency_ms || 0) + 'ms</div></div>';
+    }).join('');
+  }
+
+  function reload() {
+    if (!STATE.pwd) return;
+    fetch('/api/admin/stats?password=' + encodeURIComponent(STATE.pwd))
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (d && !d.error) renderAll(d); })
+      .catch(function () { toast('刷新失败'); });
+    loadCareBrief();
+  }
+  window.__reloadAdmin = reload;
+
+  // ============ 养护数据 ============
+  function loadCareBrief() {
+    fetch('/api/admin/care?password=' + encodeURIComponent(STATE.pwd))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!$('ovPets')) return;
+        var o = (d && d.overview) || {};
+        if (!o.pets && o.pets !== 0) return;
+        $('ovPets').textContent = o.pets || 0;
+        $('ovPetsTip').textContent = '建档用户 ' + (o.pet_users || 0) + ' 人';
+        $('ovLogs').textContent = o.logs_today || 0;
+        $('ovLogsTip').textContent = '累计 ' + (o.logs || 0) + ' 条';
+        $('ovTri').textContent = o.triage_today || 0;
+        $('ovTriTip').textContent = '累计 ' + (o.triage_total || 0) + ' 次';
+        $('ovAbn').textContent = o.abnormal_24h || 0;
+        $('ovAbnTip').textContent = o.abnormal_24h ? '建议主动联系用户' : '暂无异常';
+      })
+      .catch(function () {});
+  }
+
+  function loadCare() {
+    fetch('/api/admin/care?password=' + encodeURIComponent(STATE.pwd))
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (d && !d.error) renderCare(d); })
+      .catch(function () {});
+  }
+
+  function careRank(list, unit) {
+    if (!list || !list.length) return '<div class="empty">暂无数据</div>';
+    return list.map(function (x, i) {
+      return '<div class="rank-row"><div class="rank-idx">' + (i + 1) + '</div>'
+        + '<div class="rank-q">' + esc(x.name) + '</div>'
+        + '<div class="rank-cnt">' + x.n + (unit || '') + '</div></div>';
+    }).join('');
+  }
+
+  function renderCare(d) {
+    var o = d.overview || {};
+    $('careLive').textContent = '最后更新 ' + new Date().toLocaleTimeString('zh-CN', { hour12: false });
+    $('careUserCnt').textContent = o.pet_users || 0;
+    $('careUserTip').textContent = '今日活跃 ' + (o.care_users_today || 0) + ' 人';
+    $('carePetCnt').textContent = o.pets || 0;
+    $('carePetTip').textContent = '人均 ' + (o.pets_per_user || 0) + ' 只';
+    $('careLogCnt').textContent = o.logs || 0;
+    $('careLogTip').textContent = '7 日 ' + (o.logs_7d || 0) + ' 条';
+    $('careAbnCnt').textContent = o.abnormal_24h || 0;
+    $('careLogToday').textContent = o.logs_today || 0;
+    var pl = d.petlogs || {};
+    $('carePlToday').textContent = pl.today || 0;
+    $('careTriToday').textContent = o.triage_today || 0;
+    $('careAidToday').textContent = o.aid_today || 0;
+    $('careVetToday').textContent = o.vet_today || 0;
+
+    // 趋势：14 天，墨绿柱记录、陶土柱分诊
+    var trend = d.trend || [];
+    var max = 0;
+    trend.forEach(function (t) { max = Math.max(max, t.logs || 0, t.triage || 0); });
+    if (!max) {
+      $('careTrend').innerHTML = '<div class="chart-empty">近 14 天暂无养护记录</div>';
+    } else {
+      $('careTrend').innerHTML = trend.map(function (t, i) {
+        var h1 = Math.max(t.logs ? 4 : 0, Math.round((t.logs || 0) / max * 100));
+        var h2 = Math.max(t.triage ? 4 : 0, Math.round((t.triage || 0) / max * 100));
+        var narrow = (window.innerWidth || 1024) < 560;
+        var step = narrow ? 3 : 2;
+        var lbl = '';
+        if (i === trend.length - 1) lbl = narrow ? String(t.d).slice(-2) : t.d;
+        else if (i % step === 0 && !(narrow && i === trend.length - 2)) lbl = String(t.d).slice(-2);
+        return '<div class="bar-col" title="' + esc(t.d) + ' 记录 ' + (t.logs || 0) + ' 条 / 分诊 ' + (t.triage || 0) + ' 次">'
+          + '<div class="bar-val">' + (t.logs || '') + '</div>'
+          + '<div style="flex:1;display:flex;align-items:flex-end;justify-content:center;gap:2px;width:100%">'
+          + '<i style="display:block;width:44%;background:#1E4634;height:' + h1 + '%"></i>'
+          + '<i style="display:block;width:30%;background:#B4572F;height:' + h2 + '%"></i>'
+          + '</div><div class="bar-lbl">' + esc(lbl) + '</div></div>';
+      }).join('');
+    }
+
+    // 物种分布
+    var sp = (d.species || []).map(function (s) {
+      return { name: s.name + '（' + s.logs + '）', n: s.pets };
+    });
+    $('careSpecies').innerHTML = careRank(sp, ' 只');
+
+    // 分诊级别
+    var lv = (d.triage && d.triage.levels) || [];
+    var total = lv.reduce(function (s, x) { return s + (x.n || 0); }, 0);
+    var color = { 3: '#A93E2A', 2: '#9A6B1E', 1: '#1E4634' };
+    $('careTriTotal').textContent = total;
+    $('careLevels').innerHTML = lv.map(function (x) {
+      var pct = total ? Math.round((x.n || 0) / total * 100) : 0;
+      return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+        + '<div style="width:66px;font-size:12.5px;font-weight:700;color:' + color[x.level] + '">' + esc(x.name) + '</div>'
+        + '<div style="flex:1;height:20px;background:#EAE4D6;border-radius:6px;overflow:hidden">'
+        + '<div style="height:100%;width:' + pct + '%;background:' + color[x.level] + ';border-radius:6px"></div></div>'
+        + '<div style="width:70px;text-align:right;font-size:12px;color:var(--muted)">' + (x.n || 0) + ' 次 · ' + pct + '%</div></div>';
+    }).join('');
+
+    // 打卡类型
+    var plTypes = pl.by_type || [];
+    $('carePlTotal').textContent = pl.total || 0;
+    $('carePlTypes').innerHTML = plTypes.length
+      ? careRank(plTypes.map(function (t) { return { name: t.name, n: t.n }; }), ' 条')
+      : '<div class="empty">还没有打卡记录</div>';
+
+    // 拍照诊断
+    var dg = d.diag || {};
+    $('careDiagToday').textContent = dg.today || 0;
+    $('careDiagTotal').textContent = dg.total || 0;
+    $('careDiagUsers').textContent = dg.users || 0;
+    var dgLv = dg.levels || [];
+    var dgSum = dgLv.reduce(function (s, x) { return s + (x.n || 0); }, 0);
+    var dgColor = { 0: '#1E4634', 1: '#9A6B1E', 2: '#A93E2A' };
+    var dgName = { 0: '居家观察', 1: '24h 就医', 2: '急诊' };
+    $('careDiagLevels').innerHTML = dgSum
+      ? dgLv.map(function (x) {
+          var pct = Math.round((x.n || 0) / dgSum * 100);
+          return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+            + '<div style="width:66px;font-size:12.5px;font-weight:700;color:' + dgColor[x.lv] + '">' + dgName[x.lv] + '</div>'
+            + '<div style="flex:1;height:20px;background:#EAE4D6;border-radius:6px;overflow:hidden">'
+            + '<div style="height:100%;width:' + pct + '%;background:' + dgColor[x.lv] + ';border-radius:6px"></div></div>'
+            + '<div style="width:70px;text-align:right;font-size:12px;color:var(--muted)">' + (x.n || 0) + ' 次 · ' + pct + '%</div></div>';
+        }).join('')
+      : '<div class="empty">还没有诊断记录</div>';
+    $('careDiagSpecies').innerHTML = (dg.species && dg.species.length)
+      ? careRank(dg.species.map(function (s) { return { name: s.name, n: s.n }; }), ' 次')
+      : '<div class="empty">还没有诊断记录</div>';
+
+    // 温湿度异常
+    var ab = d.abnormal || [];
+    $('careAbnormal').innerHTML = ab.length ? ab.map(function (a) {
+      return '<div class="care-row"><div class="care-row-top">'
+        + '<b>' + esc(a.pet) + '</b><span class="care-dim">' + esc(a.species) + '</span>'
+        + '<span class="care-flag">' + esc(a.tag) + '</span></div>'
+        + '<div class="care-row-sub">实测 ' + a.temp + '℃ / ' + a.hum + '% · ' + esc(a.time)
+        + ' · ' + esc(a.user || '—') + '</div></div>';
+    }).join('') : '<div class="empty">近 24 小时没有超区间的记录</div>';
+
+    // 症状 / 急救
+    $('careSymptoms').innerHTML = careRank((d.triage && d.triage.symptoms) || [], ' 次');
+    $('careAidTop').innerHTML = careRank(d.aid || [], ' 次');
+
+    // 用户明细
+    var us = d.users || [];
+    $('careUserTable').innerHTML = us.length ? us.map(function (u) {
+      return '<div class="care-row"><div class="care-row-top">'
+        + '<b>' + esc(u.user) + '</b><span class="care-dim">' + esc(u.phone || '') + '</span></div>'
+        + '<div class="care-row-sub">档案 ' + u.pets + ' · 记录 ' + u.logs + ' · 分诊 ' + u.triage
+        + ' · 急救 ' + u.aid + ' · 就医 ' + u.vet + ' · 最近 ' + esc(u.last) + '</div></div>';
+    }).join('') : '<div class="empty">还没有用户使用养护模块</div>';
+  }
+
+  // 养护页 15 秒自动刷新（仅在该 Tab 且页面可见时）
+  setInterval(function () {
+    if (document.hidden || !STATE.pwd) return;
+    var act = document.querySelector('.tab.active');
+    if (act && act.dataset.tab === 'care') loadCare();
+  }, 15000);
+
+  // 每 60 秒自动刷新（页面可见时）
+  setInterval(function () {
+    if (!document.hidden && STATE.pwd) reload();
+  }, 60000);
+
+  // ============ 系统配置 ============
+  var PRESET = {
+    deepseek: { base_url: 'https://api.deepseek.com/v1', model: 'deepseek-chat' },
+    qwen: { base_url: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-plus' },
+    moonshot: { base_url: 'https://api.moonshot.cn/v1', model: 'moonshot-v1-8k' },
+    zhipu: { base_url: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4-flash' },
+    openai: { base_url: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+    custom: { base_url: '', model: '' }
+  };
+  var providerEl = $('provider'), baseUrlEl = $('base_url'), modelEl = $('model');
+  var apiKeyEl = $('api_key'), passwordEl = $('password'), newPasswordEl = $('new_password');
+
+  function refreshStatus() {
+    fetch('/api/admin/status?password=' + encodeURIComponent(STATE.pwd)).then(function (r) { return r.json(); }).then(function (s) {
+      var html = '';
+      html += s.configured ? '<div class="ok">已配置，问答服务可用</div>' : '<div class="warn">未完成配置，问答服务不可用</div>';
+      html += '<div style="margin-top:8px">服务商：<span class="tag">' + esc(s.provider_name || s.provider || '—') + '</span></div>';
+      html += '<div style="margin-top:4px">模型：' + esc(s.model || '—') + '</div>';
+      html += '<div style="margin-top:4px">API Key：' + esc(s.masked_key || '未设置') + '</div>';
+      html += '<div style="margin-top:4px">知识库：' + s.knowledge_count + ' 条 / ' + s.species_count + ' 个物种'
+        + (s.dex_total ? '（图鉴收录 ' + s.dex_total + '：可养 ' + s.dex_keep + ' · 禁养 ' + s.dex_no + '）' : '')
+        + '</div>';
+      if (s.default_password) html += '<div style="margin-top:4px" class="warn">仍在使用默认管理员密码，建议修改</div>';
+      if (s.feedback_pending) html += '<div style="margin-top:4px" class="warn">有 ' + s.feedback_pending + ' 条用户反馈待处理</div>';
+      $('status-box').innerHTML = html;
+      var sp = $('support');
+      if (sp) sp.value = s.support || '';
+      var sh = $('support_hours');
+      if (sh) sh.value = s.support_hours || '';
+      // 识图模型
+      var vm = $('vision_model');
+      if (vm) vm.value = s.vision_model || '';
+      var vb = $('vision_base_url');
+      if (vb) vb.value = s.vision_base_url || '';
+      var vk = $('vision_api_key');
+      if (vk) vk.value = '';
+      var vh = $('visionHint');
+      if (vh) {
+        vh.textContent = '当前生效：' + (s.vision_effective || '—')
+          + (s.vision_model ? '（后台指定）' : '（按服务商默认）')
+          + (s.vision_has_key ? ' · 独立 Key 已设置' : ' · 沿用主 Key');
+      }
+      // 附近医院：只回显前 4 位，够确认是哪一个 Key
+      var am = $('amapStatus');
+      if (am) {
+        am.innerHTML = s.amap_ready
+          ? '<div class="ok">已配置（' + esc(s.amap_masked || '') + '），前台可以直接列出附近医院</div>'
+          : '<div class="warn">未配置：前台会退化成「跳地图搜索」，功能不报错但没有列表</div>';
+      }
+      // 公众号网页授权
+      var wa = $('wx_appid');
+      if (wa) wa.value = s.wx_appid || '';
+      var wd = $('wx_redirect_domain');
+      if (wd) wd.value = s.wx_redirect_domain || '';
+      var wf = $('wx_verify_file');
+      if (wf) wf.value = s.wx_verify_file || '';
+      var wt = $('wx_verify_text');
+      if (wt) wt.value = s.wx_verify_text || '';
+      var ws = $('wxStatus');
+      if (ws) {
+        var line = '';
+        if (!s.wx_appid) {
+          line = '<div class="warn">未填写 AppID，微信登录入口不会出现</div>';
+        } else if (!s.wx_has_secret) {
+          line = '<div class="warn">已填 AppID，缺 AppSecret，仍无法登录</div>';
+        } else if (!s.wx_redirect_domain) {
+          line = '<div class="warn">已配置 AppID 与 Secret，建议补上授权回调域名</div>';
+        } else {
+          line = '<div class="ok">已配置，微信内可通过公众号入口登录</div>';
+        }
+        line += '<div style="margin-top:6px">AppSecret：' + (s.wx_has_secret ? '已设置（不回显）' : '未设置') + '</div>';
+        // 就算 AppID/Secret 都齐了，托管域名过不了微信校验，仍然用不了
+        if (s.wx_ready) {
+          var host = s.wx_redirect_domain || '';
+          if (!host || /\.workbuddy\.host$/i.test(host)) {
+            line += '<div class="warn" style="margin-top:6px">但当前托管域名通不过微信校验，实际仍不可用</div>';
+          }
+        }
+        if (s.wx_verify_file) {
+          var ok = s.wx_verify_text ? 'ok' : 'warn';
+          line += '<div style="margin-top:6px">域名校验文件：<span class="' + ok + '">'
+            + esc(s.wx_verify_file) + '</span>'
+            + (s.wx_verify_text ? '（内容已填）' : '（内容未填，微信抓取会失败）')
+            + '</div>';
+        }
+        ws.innerHTML = line;
+      }
+    }).catch(function () { $('status-box').innerHTML = '<span class="warn">无法连接服务</span>'; });
+  }
+
+  providerEl.addEventListener('change', function () {
+    var p = PRESET[providerEl.value];
+    if (p) { baseUrlEl.value = p.base_url; modelEl.value = p.model; }
+  });
+
+  function saveConfig() {
+    var body = {
+      password: passwordEl.value.trim() || STATE.pwd,
+      provider: providerEl.value,
+      base_url: baseUrlEl.value.trim(),
+      model: modelEl.value.trim(),
+      api_key: apiKeyEl.value.trim(),
+      new_admin_password: newPasswordEl.value.trim(),
+      support: ($('support').value || '').trim(),
+      support_hours: ($('support_hours').value || '').trim(),
+      vision_model: ($('vision_model').value || '').trim(),
+      vision_base_url: ($('vision_base_url').value || '').trim(),
+      vision_api_key: ($('vision_api_key').value || '').trim(),
+      wx_appid: ($('wx_appid').value || '').trim(),
+      wx_appsecret: ($('wx_appsecret').value || '').trim(),
+      wx_redirect_domain: ($('wx_redirect_domain').value || '').trim(),
+      wx_verify_file: ($('wx_verify_file').value || '').trim(),
+      wx_verify_text: ($('wx_verify_text').value || '').trim(),
+      amap_key: ($('amap_key').value || '').trim()
+    };
+    if (!body.password) { toast('请输入管理员密码'); return; }
+    fetch('/api/admin/config', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    }).then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+      .then(function (res) {
+        if (res.status === 200 && res.d.ok) {
+          toast('保存成功');
+          var pwd = body.new_admin_password || body.password;
+          STATE.pwd = pwd;
+          try { localStorage.setItem(LS_PWD, pwd); } catch (e) {}
+          passwordEl.value = pwd;
+          newPasswordEl.value = '';
+          apiKeyEl.value = '';
+          var wsec = $('wx_appsecret');
+          if (wsec) wsec.value = '';
+          refreshStatus();
+        } else {
+          toast((res.d && res.d.error) || '保存失败');
+        }
+      }).catch(function () { toast('网络请求失败'); });
+  }
+
+  $('save').addEventListener('click', saveConfig);
+  var saveWxBtn = $('saveWx');
+  if (saveWxBtn) saveWxBtn.addEventListener('click', saveConfig);
+  var saveAmapBtn = $('saveAmap');
+  if (saveAmapBtn) saveAmapBtn.addEventListener('click', saveConfig);
+
+  // ============ 清空统计 ============
+  $('clearStats').addEventListener('click', function () {
+    if (!confirm('确定清空全部统计数据？用户活跃记录也会一起清空，不可恢复。')) return;
+    fetch('/api/admin/stats/clear', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: STATE.pwd })
+    }).then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) { toast('已清空'); reload(); }
+        else toast(d.error || '清空失败');
+      }).catch(function () { toast('网络请求失败'); });
+  });
+
+  // ============ 资讯 ============
+  function loadNewsAdmin() {
+    var box = $('news-status-box');
+    if (!STATE.pwd) { box.innerHTML = '<span class="warn">请先登录</span>'; return; }
+    fetch('/api/admin/news/status?password=' + encodeURIComponent(STATE.pwd))
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+      .then(function (res) {
+        if (res.status !== 200) {
+          box.innerHTML = '<span class="warn">' + esc((res.d && res.d.error) || '加载失败') + '</span>';
+          return;
+        }
+        var d = res.d;
+        var log = d.last_run || {};
+        var secHtml = (d.sections || []).map(function (s) {
+          return '<span class="tag">' + esc(s.name) + ' ' + s.count + '</span>';
+        }).join('');
+        box.innerHTML = '<div>资讯总数：<b>' + (d.total || 0) + '</b> 条 · 版本：' + esc(d.version || '-')
+          + ' · 更新于 ' + esc(d.updated || '-') + '</div>'
+          + '<div style="margin-top:8px">上次自动检查：' + esc(log.last_run_str || '尚未运行')
+          + (log.added !== undefined ? '（新增 ' + log.added + ' 条）' : '') + '</div>'
+          + '<div style="margin-top:10px">' + secHtml + '</div>'
+          + (log.errors && log.errors.length ? '<div class="warn" style="margin-top:8px">抓取失败：' + esc(log.errors.join('；')) + '</div>' : '');
+      })
+      .catch(function () { box.innerHTML = '<span class="warn">网络请求失败</span>'; });
+  }
+
+  $('newsRun').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true; btn.textContent = '更新中…';
+    fetch('/api/admin/news/run', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: STATE.pwd })
+    }).then(function (r) { return r.json(); })
+      .then(function (d) {
+        btn.disabled = false; btn.textContent = '立即更新';
+        if (d.ok) { toast('更新完成，新增 ' + ((d.log && d.log.added) || 0) + ' 条'); loadNewsAdmin(); }
+        else toast(d.error || '更新失败');
+      }).catch(function () {
+        btn.disabled = false; btn.textContent = '立即更新';
+        toast('网络请求失败');
+      });
+  });
+
+  $('newsAdd').addEventListener('click', function () {
+    var title = $('newsTitle').value.trim();
+    if (!title) { toast('请填写标题'); return; }
+    var btn = this; btn.disabled = true;
+    fetch('/api/admin/news/add', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        password: STATE.pwd, title: title,
+        summary: $('newsSummary').value.trim(),
+        source: $('newsSource').value.trim(),
+        date: $('newsDate').value,
+        section: $('newsSection').value,
+        url: $('newsUrl').value.trim()
+      })
+    }).then(function (r) { return r.json(); })
+      .then(function (d) {
+        btn.disabled = false;
+        if (d.ok) {
+          toast('已发布');
+          $('newsTitle').value = ''; $('newsSummary').value = ''; $('newsSource').value = ''; $('newsUrl').value = '';
+          loadNewsAdmin();
+        } else toast(d.error || '发布失败');
+      }).catch(function () { btn.disabled = false; toast('网络请求失败'); });
+  });
+
+  (function initDate() {
+    var d = new Date();
+    var p = function (n) { return ('0' + n).slice(-2); };
+    $('newsDate').value = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+    var wd = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
+    $('hdrDate').textContent = d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + ' 周' + wd;
+  })();
+
+  // 自动登录
+  var saved = '';
+  try { saved = localStorage.getItem(LS_PWD) || ''; } catch (e) {}
+  if (saved) { $('loginPwd').value = saved; doLogin(saved); }
+})();
+</script>
+</body>
+</html>

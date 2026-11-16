@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.log
+data/backups/
+data/avatars/
+xc_data_backups/
